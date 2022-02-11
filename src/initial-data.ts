@@ -13,10 +13,10 @@ const initialData: AppData = {
     { id: "CITYBANK", name: "City Bank" },
   ],
   actions: [
-    { id: "SEPA", name: "SEPA transfer" },
-    { id: "SWIFT", name: "SWIFT transfer" },
-    { id: "CRYPTOTX", name: "CRYPTO transfer" },
-    { id: "EXCHANGE", name: "Exchange" },
+    { id: "action_SEPA", name: "SEPA transfer" },
+    { id: "action_SWIFT", name: "SWIFT transfer" },
+    { id: "action_CRYPTOTX", name: "CRYPTO transfer" },
+    { id: "action_EXCHANGE", name: "Exchange" },
   ],
   links: [
     {
@@ -52,6 +52,8 @@ const initialData: AppData = {
       mode: "editable",
     },
   ],
+  states: [],
+  stateOrder: [],
   recipes: {
     recipe_GGUBbciNODYsieVAv5qzb: {
       id: "recipe_GGUBbciNODYsieVAv5qzb",

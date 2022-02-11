@@ -66,9 +66,9 @@ export interface AppData {
   currencies: Currency[];
   platforms: Platform[];
   actions: Action[];
-  links?: Link[];
-  states?: State[];
-  stateOrder?: string[];
+  links: Link[];
+  states: State[];
+  stateOrder: string[];
   recipes: Recipes;
-  recipeOrder?: string[];
+  recipeOrder: string[];
 }

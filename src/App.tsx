@@ -4,7 +4,14 @@ import styled from "styled-components";
 import initialData from "./initial-data";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { nanoid } from "nanoid";
-import { Action, AppData, Link, State } from "./common/types";
+import {
+  Action,
+  AppData,
+  Link,
+  State,
+  Platform,
+  Currency,
+} from "./common/types";
 import Hide from "./common/Hide";
 
 function App() {
@@ -21,9 +28,18 @@ function App() {
   );
   const [newRecipeName, setNewRecipeName] = useState<string>("");
   const [addStateUnitPopupVisibility, setAddStateUnitPopupVisibility] =
+    useState<boolean>(false);
+  const [createLinkWarningVisibility, setCreateLinkWarningVisibility] =
+    useState<boolean>(true);
+  const [createLinkPopupVisibility, setCreateLinkPopupVisibility] =
     useState<boolean>(true);
   const [addRecipePopupVisibility, setAddRecipePopupVisibility] =
     useState<boolean>(true);
+  const [potentialLinkData, setPotentialLinkData] = useState<Link>({
+    id: "",
+    name: "",
+  });
+
   const addState = () => {
     const newState: State = {
       id: nanoid(),
@@ -85,7 +101,65 @@ function App() {
     const value = event.target.value;
     setNewRecipeName(value);
   };
-  const onDragStart = (data: any) => {};
+  const getPlatformByIngredientId = (id: string | undefined): Platform => {
+    const ingredient: State | undefined = appState.states?.find(
+      (state) => state.id === id
+    );
+
+    const platform: Platform | undefined =
+      ingredient &&
+      appState.platforms.find(
+        (platform) => platform.id === ingredient.platformId
+      );
+    return platform || { id: "", name: "" };
+  };
+  const getPlatformNameByIngredientId = (id: string | undefined): string => {
+    const platform = getPlatformByIngredientId(id);
+    return platform?.name || "";
+  };
+  const getCurrencyByIngredientId = (id: string | undefined): Currency => {
+    const ingredient: State | undefined = appState.states.find(
+      (state) => state.id === id
+    );
+
+    const currency: Currency | undefined =
+      ingredient &&
+      appState.currencies.find(
+        (currency) => currency.id === ingredient.currencyId
+      );
+    return currency || { id: "", name: "" };
+  };
+
+  const getCurrencyNameByIngredientId = (id: string | undefined): string => {
+    const currency = getCurrencyByIngredientId(id);
+    return currency?.name || "";
+  };
+
+  const onDragUpdate = (data: any) => {
+    console.log(data);
+    if (!data.destination) {
+      setCreateLinkWarningVisibility(true);
+      return;
+    }
+    if (!appState.recipes[data.destination.droppableId]?.ingredientList) {
+      setCreateLinkWarningVisibility(true);
+      return;
+    }
+    const ingredientList =
+      appState.recipes[data.destination.droppableId]?.ingredientList;
+    const index = data.destination.index;
+    if (
+      data.draggableId.search("action") !== -1 &&
+      ingredientList &&
+      ingredientList[index - 1]?.type === "state" &&
+      ingredientList[index]?.type === "state"
+    ) {
+      console.log("ezzazz");
+      setCreateLinkWarningVisibility(false);
+    } else {
+      setCreateLinkWarningVisibility(true);
+    }
+  };
   const onDragEnd = (data: any) => {
     const { source, destination, reason, draggableId } = data;
     if (!destination) return;
@@ -93,7 +167,7 @@ function App() {
     if (destination.droppableId.includes("recipe")) {
       const destId = destination.droppableId;
       const currentRecipe = appState.recipes[destId];
-      if (source.droppableId === "states" || source.droppableId === "actions") {
+      if (source.droppableId === "states") {
         const newId = nanoid();
         setAppState((prev) => ({
           ...prev,
@@ -113,8 +187,38 @@ function App() {
             },
           },
         }));
+      } else if (source.droppableId === "actions") {
+        const { index } = destination;
+        const ingredientList =
+          appState.recipes[destination.droppableId].ingredientList;
+        if (
+          ingredientList[index - 1]?.type === "state" &&
+          ingredientList[index]?.type === "state"
+        ) {
+          const sourcePlatform = getPlatformByIngredientId(
+            ingredientList[index - 1]?.id
+          );
+          const destPlatform = getPlatformByIngredientId(
+            ingredientList[index]?.id
+          );
+          const sourceCurrency = getCurrencyByIngredientId(
+            ingredientList[index - 1]?.id
+          );
+          const destCurrency = getCurrencyByIngredientId(
+            ingredientList[index]?.id
+          );
+          setPotentialLinkData({
+            id: nanoid(),
+            name: "",
+            sourcePlatformId: sourcePlatform.id,
+            destPlatformId: destPlatform.id,
+            sourceCurrencyId: sourceCurrency.id,
+            destCurrencyId: destCurrency.id,
+            actionId: draggableId,
+          });
+          setCreateLinkPopupVisibility(false);
+        }
       } else if (source.droppableId === destination.droppableId) {
-        console.log(destId, draggableId);
         setAppState((prev) => {
           const step1 = [
             ...currentRecipe.ingredientList.slice(0, source.index),
@@ -145,7 +249,34 @@ function App() {
 
   return (
     <div>
-      <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
+      <Hide when={createLinkPopupVisibility}>
+        <CreateLinkPopover>
+          <CreateLinkContent>
+            <div>id: {potentialLinkData.id}</div>
+            <div>
+              name: <input />
+            </div>
+            <div>source platform:{potentialLinkData.sourcePlatformId}</div>
+            <div>dest platform:{potentialLinkData.destPlatformId}</div>
+            <div>source currency:{potentialLinkData.sourceCurrencyId}</div>
+            <div>dest currency:{potentialLinkData.destCurrencyId}</div>
+            <div>action id:{potentialLinkData.actionId}</div>
+            <div>
+              duration: <input />{" "}
+              <select>
+                <option>seconds</option>
+                <option>minutes</option>
+                <option>hours</option>
+                <option>days</option>
+              </select>
+            </div>
+            <button onClick={() => setCreateLinkPopupVisibility(true)}>
+              X
+            </button>
+          </CreateLinkContent>
+        </CreateLinkPopover>
+      </Hide>
+      <DragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragUpdate}>
         <Container>
           <StateContainer>
             <Title>States</Title>
@@ -156,7 +287,7 @@ function App() {
             </button>
             <Hide when={addStateUnitPopupVisibility}>
               <StateAdderPopup>
-                Platform:{" "}
+                Platform:
                 <select onChange={selectPlatform}>
                   {appState.platforms.map((platform) => (
                     <option key={platform.id} value={platform.id}>
@@ -165,7 +296,7 @@ function App() {
                   ))}
                 </select>
                 <br />
-                Currency:{" "}
+                Currency:
                 <select onChange={selectCurrency}>
                   {appState.currencies.map((currency) => (
                     <option key={currency.id} value={currency.id}>
@@ -182,19 +313,19 @@ function App() {
               direction="horizontal"
               // isDropDisabled={true}
             >
-              {(provided1) => (
-                <States {...provided1.droppableProps} ref={provided1.innerRef}>
+              {(provided) => (
+                <States {...provided.droppableProps} ref={provided.innerRef}>
                   {appState.states?.map((stateUnit, index) => (
                     <Draggable
                       draggableId={stateUnit.id}
                       index={index}
                       key={stateUnit.id}
                     >
-                      {(provided2) => (
+                      {(provided) => (
                         <StateUnit
-                          {...provided2.draggableProps}
-                          {...provided2.dragHandleProps}
-                          ref={provided2.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          ref={provided.innerRef}
                         >
                           {stateUnit.id} <br /> {stateUnit.platformId} <br />
                           {stateUnit.currencyId}
@@ -202,13 +333,46 @@ function App() {
                       )}
                     </Draggable>
                   ))}
-                  {provided1.placeholder}
+                  {provided.placeholder}
                 </States>
               )}
             </Droppable>
           </StateContainer>
           <ActionContainer>
-            <Title>Links</Title>
+            <Title>Actions</Title>
+            <Droppable droppableId="actions" direction="horizontal">
+              {(provided) => (
+                <Actions ref={provided.innerRef} {...provided.droppableProps}>
+                  {/* {JSON.stringify(snapshot)} */}
+                  {appState.actions.map((action, index) => (
+                    <Draggable
+                      draggableId={action.id}
+                      index={index}
+                      key={action.id}
+                    >
+                      {(provided, snapshot) => (
+                        <ActionUnit
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          ref={provided.innerRef}
+                        >
+                          {action.name}
+                          <Indicator
+                            hide={
+                              createLinkWarningVisibility ||
+                              !snapshot.isDragging
+                            }
+                          >
+                            !DROP TO LINK!
+                          </Indicator>
+                        </ActionUnit>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </Actions>
+              )}
+            </Droppable>
           </ActionContainer>
           <FilterContainer>
             <Title>Filters</Title>
@@ -223,7 +387,7 @@ function App() {
               </button>
               <Hide when={addRecipePopupVisibility}>
                 <StateAdderPopup>
-                  Name:{" "}
+                  Name:
                   <input onChange={changeRecipeName} value={newRecipeName} />
                   <br />
                   <button onClick={addRecipe}>Add </button>
@@ -232,15 +396,23 @@ function App() {
             </div>
             {appState.recipeOrder?.map((recipeId) => (
               <Droppable
-                droppableId={appState.recipes[recipeId].id}
+                droppableId={recipeId}
                 direction="horizontal"
+                key={recipeId}
               >
-                {(provided3) => (
-                  <Recipe
-                    {...provided3.droppableProps}
-                    ref={provided3.innerRef}
-                  >
-                    <RecipeName>{appState.recipes[recipeId].name}</RecipeName>
+                {(provided) => (
+                  <Recipe {...provided.droppableProps} ref={provided.innerRef}>
+                    <RecipeName>{`${
+                      appState.recipes[recipeId].name
+                    }(${getPlatformNameByIngredientId(
+                      appState.recipes[recipeId]?.ingredientList[0]?.unitId
+                    )}(${getCurrencyNameByIngredientId(
+                      appState.recipes[recipeId]?.ingredientList[0]?.unitId
+                    )}) - ${getPlatformNameByIngredientId(
+                      appState.recipes[recipeId]?.ingredientList?.at(-1)?.unitId
+                    )}(${getCurrencyNameByIngredientId(
+                      appState.recipes[recipeId]?.ingredientList?.at(-1)?.unitId
+                    )}))`}</RecipeName>
                     {appState.recipes[recipeId].ingredientList?.map(
                       (ingredient, index) => (
                         <Draggable
@@ -248,12 +420,12 @@ function App() {
                           index={index}
                           key={ingredient.id}
                         >
-                          {(provided4) => {
+                          {(provided) => {
                             return (
-                              <StateUnit
-                                {...provided4.draggableProps}
-                                {...provided4.dragHandleProps}
-                                ref={provided4.innerRef}
+                              <IngredientUnit
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                ref={provided.innerRef}
                               >
                                 {ingredient.id} <br /> {ingredient.unitId}{" "}
                                 <br />
@@ -268,14 +440,14 @@ function App() {
                                     "currencyId"
                                   ]
                                 }
-                              </StateUnit>
+                              </IngredientUnit>
                             );
                           }}
                         </Draggable>
                       )
                     )}
 
-                    {provided3.placeholder}
+                    {provided.placeholder}
                   </Recipe>
                 )}
               </Droppable>
@@ -287,6 +459,21 @@ function App() {
   );
 }
 export default App;
+
+const CreateLinkPopover = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(90, 90, 90, 0.2);
+  z-index: 2;
+  display: flex;
+  flex-direction: rows;
+  justify-content: center;
+  align-items: center;
+`;
+const CreateLinkContent = styled.div``;
 
 const Container = styled.div`
   display: grid;
@@ -307,13 +494,27 @@ const StateContainer = styled.div`
 const ActionContainer = styled.div`
   grid-area: actions;
 `;
+const Actions = styled.div`
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+`;
 const States = styled.div`
   display: flex;
   flex-direction: row;
   padding: 10px;
 `;
+interface IndicatorProps {
+  hide: boolean;
+}
+const Indicator = styled.div<IndicatorProps>`
+  height: 30px;
+  overflow: hidden;
+  text-align: center;
+  visibility: ${(props) => (props.hide ? "hidden" : "visible")};
+`;
 
-const StateUnit = styled.div`
+const Unit = styled.div`
   padding: 5px;
   background: lightgray;
   border-radius: 5px;
@@ -321,6 +522,10 @@ const StateUnit = styled.div`
   text-align: center;
   margin: 0 7px;
 `;
+const StateUnit = styled(Unit)``;
+const IngredientUnit = styled(Unit)``;
+const ActionUnit = styled(Unit)``;
+
 const StateAdderPopup = styled.div`
   /* position: absolute;*/
   z-index: 10;
