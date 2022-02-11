@@ -8,47 +8,50 @@ import {
   Action,
   AppData,
   Link,
-  State,
+  Wallet,
   Platform,
   Currency,
+  PotentialLink,
+  IngredientType,
 } from "./common/types";
 import Hide from "./common/Hide";
 
 function App() {
   useEffect(() => {
-    console.log("rerendeeeer");
+    // console.log("rerendeeeer");
+    // console.log(appState);
   });
 
   const [appState, setAppState] = useState<AppData>(initialData);
-  const [newStateUnitPlatform, setNewStateUnitPlatform] = useState<string>(
+  const [newWalletUnitPlatform, setNewWalletUnitPlatform] = useState<string>(
     initialData.platforms[0].id
   );
-  const [newStateUnitCurrency, setNewStateUnitCurrency] = useState<string>(
+  const [newWalletUnitCurrency, setNewWalletUnitCurrency] = useState<string>(
     initialData.currencies[0].id
   );
   const [newRecipeName, setNewRecipeName] = useState<string>("");
-  const [addStateUnitPopupVisibility, setAddStateUnitPopupVisibility] =
-    useState<boolean>(false);
+  const [addWalletUnitPopupVisibility, setAddWalletUnitPopupVisibility] =
+    useState<boolean>(true);
   const [createLinkWarningVisibility, setCreateLinkWarningVisibility] =
     useState<boolean>(true);
   const [createLinkPopupVisibility, setCreateLinkPopupVisibility] =
     useState<boolean>(true);
   const [addRecipePopupVisibility, setAddRecipePopupVisibility] =
     useState<boolean>(true);
-  const [potentialLinkData, setPotentialLinkData] = useState<Link>({
+  const [potentialLinkData, setPotentialLinkData] = useState<PotentialLink>({
     id: "",
     name: "",
   });
 
-  const addState = () => {
-    const newState: State = {
+  const addWallet = () => {
+    const newWallet: Wallet = {
       id: nanoid(),
-      platformId: newStateUnitPlatform,
-      currencyId: newStateUnitCurrency,
+      platformId: newWalletUnitPlatform,
+      currencyId: newWalletUnitCurrency,
     };
     setAppState((prev) => ({
       ...prev,
-      states: prev.states ? [...prev.states, newState] : [newState],
+      wallets: prev.wallets ? [...prev.wallets, newWallet] : [newWallet],
     }));
   };
 
@@ -58,7 +61,13 @@ function App() {
       ...prev,
       recipes: {
         ...prev.recipes,
-        [newId]: { id: newId, name: newRecipeName, ingredientList: [] },
+        [newId]: {
+          id: newId,
+          name: newRecipeName,
+          approveCount: 0,
+          disapproveCount: 0,
+          ingredientList: [],
+        },
       },
     }));
     setAppState((prev) => ({
@@ -67,16 +76,51 @@ function App() {
     }));
   };
 
-  const getUnitTypeById = (id: string): "state" | "link" => {
-    return getStateById(id) ? "state" : "link";
+  const addLink = () => {
+    // console.log(potentialLinkData);
+    const { id, duration, durationUnit, name, costFix } = potentialLinkData;
+    const newLink: Link = {
+      id: id,
+      name: name,
+      duration: duration,
+      costFix: costFix,
+      durationUnit: durationUnit,
+    };
+    if (potentialLinkData.recipeId) {
+      setAppState((prev) => {
+        const recipe = prev.recipes[potentialLinkData.recipeId || 0];
+        const ingredientList = recipe.ingredientList;
+        const index = potentialLinkData
+          ? potentialLinkData.index
+            ? potentialLinkData.index
+            : 0
+          : 0;
+        const newIngredientList = [
+          ...ingredientList.slice(0, index),
+          {
+            id: nanoid(),
+            type: "action" as IngredientType,
+            unitId: id,
+          },
+          ...ingredientList.slice(potentialLinkData.index),
+        ];
+        const newRecipe = { ...recipe, ingredientList: newIngredientList };
+        return {
+          ...prev,
+          links: [...prev.links, newLink],
+          recipes: { ...prev.recipes, [recipe.id]: newRecipe },
+        };
+      });
+    }
+    setCreateLinkPopupVisibility(true);
   };
 
-  const getStateOrActionById = (id: string): State | Action | undefined => {
-    return getStateById(id) || getLinkById(id);
+  const getUnitTypeById = (id: string): "wallet" | "link" => {
+    return getWalletById(id) ? "wallet" : "link";
   };
 
-  const getStateById = (id: string): State | undefined => {
-    return appState.states?.find((state) => state.id === id);
+  const getWalletById = (id: string): Wallet | undefined => {
+    return appState.wallets?.find((wallet) => wallet.id === id);
   };
 
   const getLinkById = (id: string): Link | undefined => {
@@ -87,13 +131,13 @@ function App() {
     event: React.ChangeEvent<HTMLSelectElement>
   ): void => {
     const value = event.target.value;
-    setNewStateUnitPlatform(value);
+    setNewWalletUnitPlatform(value);
   };
   const selectCurrency = (
     event: React.ChangeEvent<HTMLSelectElement>
   ): void => {
     const value = event.target.value;
-    setNewStateUnitCurrency(value);
+    setNewWalletUnitCurrency(value);
   };
   const changeRecipeName = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -101,9 +145,33 @@ function App() {
     const value = event.target.value;
     setNewRecipeName(value);
   };
+  const approveRecipe = (recipeId: string) => {
+    setAppState((prev) => {
+      const recipe = appState.recipes[recipeId];
+      const newRecipe = {
+        ...recipe,
+        approveCount: recipe.approveCount ? recipe.approveCount + 1 : 1,
+      };
+      return { ...prev, recipes: { ...prev.recipes, [recipeId]: newRecipe } };
+    });
+  };
+
+  const disapproveRecipe = (recipeId: string) => {
+    setAppState((prev) => {
+      const recipe = appState.recipes[recipeId];
+      const newRecipe = {
+        ...recipe,
+        disapproveCount: recipe.disapproveCount
+          ? recipe.disapproveCount + 1
+          : 1,
+      };
+      return { ...prev, recipes: { ...prev.recipes, [recipeId]: newRecipe } };
+    });
+  };
+
   const getPlatformByIngredientId = (id: string | undefined): Platform => {
-    const ingredient: State | undefined = appState.states?.find(
-      (state) => state.id === id
+    const ingredient: Wallet | undefined = appState.wallets?.find(
+      (wallet) => wallet.id === id
     );
 
     const platform: Platform | undefined =
@@ -118,8 +186,8 @@ function App() {
     return platform?.name || "";
   };
   const getCurrencyByIngredientId = (id: string | undefined): Currency => {
-    const ingredient: State | undefined = appState.states.find(
-      (state) => state.id === id
+    const ingredient: Wallet | undefined = appState.wallets.find(
+      (wallet) => wallet.id === id
     );
 
     const currency: Currency | undefined =
@@ -134,9 +202,32 @@ function App() {
     const currency = getCurrencyByIngredientId(id);
     return currency?.name || "";
   };
+  const changePotentialLinkData = (
+    event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+  ): void => {
+    const field = event.target.dataset["field"] as string;
+    setPotentialLinkData((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+  const calculateTotalRecipeDuration = (recipeId: string) => {
+    console.log("whoa");
 
+    const links = appState.recipes[recipeId].ingredientList.filter(
+      (ingredient) => ingredient.type === "action"
+    );
+    const duration: number = links.reduce((acc, curr, index) => {
+      console.log(
+        "heyy",
+        index,
+        acc,
+        appState.links.find((link) => link.id === curr.unitId)?.["duration"]
+      );
+      const currUnit = appState.links.find((link) => link.id === curr.unitId);
+      return currUnit ? (currUnit.duration ? currUnit.duration : 0) : 0;
+    }, 0);
+    return duration;
+  };
   const onDragUpdate = (data: any) => {
-    console.log(data);
+    // console.log(data);
     if (!data.destination) {
       setCreateLinkWarningVisibility(true);
       return;
@@ -151,10 +242,9 @@ function App() {
     if (
       data.draggableId.search("action") !== -1 &&
       ingredientList &&
-      ingredientList[index - 1]?.type === "state" &&
-      ingredientList[index]?.type === "state"
+      ingredientList[index - 1]?.type === "wallet" &&
+      ingredientList[index]?.type === "wallet"
     ) {
-      console.log("ezzazz");
       setCreateLinkWarningVisibility(false);
     } else {
       setCreateLinkWarningVisibility(true);
@@ -164,10 +254,10 @@ function App() {
     const { source, destination, reason, draggableId } = data;
     if (!destination) return;
     if (reason !== "DROP") return;
+    const destId = destination.droppableId;
     if (destination.droppableId.includes("recipe")) {
-      const destId = destination.droppableId;
       const currentRecipe = appState.recipes[destId];
-      if (source.droppableId === "states") {
+      if (source.droppableId === "wallets") {
         const newId = nanoid();
         setAppState((prev) => ({
           ...prev,
@@ -189,32 +279,37 @@ function App() {
         }));
       } else if (source.droppableId === "actions") {
         const { index } = destination;
+        const action = appState.actions.find(
+          (action) => action.id === draggableId
+        );
         const ingredientList =
           appState.recipes[destination.droppableId].ingredientList;
         if (
-          ingredientList[index - 1]?.type === "state" &&
-          ingredientList[index]?.type === "state"
+          ingredientList[index - 1]?.type === "wallet" &&
+          ingredientList[index]?.type === "wallet"
         ) {
           const sourcePlatform = getPlatformByIngredientId(
-            ingredientList[index - 1]?.id
+            ingredientList[index - 1]?.unitId
           );
           const destPlatform = getPlatformByIngredientId(
-            ingredientList[index]?.id
+            ingredientList[index]?.unitId
           );
           const sourceCurrency = getCurrencyByIngredientId(
-            ingredientList[index - 1]?.id
+            ingredientList[index - 1]?.unitId
           );
           const destCurrency = getCurrencyByIngredientId(
-            ingredientList[index]?.id
+            ingredientList[index]?.unitId
           );
           setPotentialLinkData({
             id: nanoid(),
-            name: "",
+            name: action?.name,
             sourcePlatformId: sourcePlatform.id,
             destPlatformId: destPlatform.id,
             sourceCurrencyId: sourceCurrency.id,
             destCurrencyId: destCurrency.id,
             actionId: draggableId,
+            recipeId: destId,
+            index: index,
           });
           setCreateLinkPopupVisibility(false);
         }
@@ -250,43 +345,78 @@ function App() {
   return (
     <div>
       <Hide when={createLinkPopupVisibility}>
-        <CreateLinkPopover>
+        <CreateLinkOverlay>
           <CreateLinkContent>
-            <div>id: {potentialLinkData.id}</div>
-            <div>
-              name: <input />
+            <CloseButtonContainer>
+              <button onClick={() => setCreateLinkPopupVisibility(true)}>
+                X
+              </button>
+            </CloseButtonContainer>
+            <CreateLinkData>
+              <div>id: </div>
+              <div>{potentialLinkData.id}</div>
+              <div>name: </div>
+              <div>
+                <input
+                  value={potentialLinkData.name}
+                  onChange={changePotentialLinkData}
+                  data-field="name"
+                />
+              </div>
+              <div>source platform:</div>
+              <div>{potentialLinkData.sourcePlatformId}</div>
+              <div>dest platform:</div>
+              <div>{potentialLinkData.destPlatformId}</div>
+              <div>source currency:</div>
+              <div>{potentialLinkData.sourceCurrencyId}</div>
+              <div>dest currency:</div>
+              <div>{potentialLinkData.destCurrencyId}</div>
+              <div>action id:</div>
+              <div>{potentialLinkData.actionId}</div>
+              <div>Cost:</div>
+              <div>
+                <input
+                  value={potentialLinkData.costFix}
+                  data-field="costFix"
+                  onChange={changePotentialLinkData}
+                />
+              </div>
+              <div>duration:</div>
+              <div>
+                <input
+                  value={potentialLinkData.duration}
+                  data-field="duration"
+                  onChange={changePotentialLinkData}
+                />
+                <select
+                  value={potentialLinkData.durationUnit}
+                  onChange={changePotentialLinkData}
+                  data-field="durationUnit"
+                >
+                  <option value="1">seconds</option>
+                  <option value="60">minutes</option>
+                  <option value="3600">hours</option>
+                  <option value="86400">days</option>
+                </select>
+              </div>
+            </CreateLinkData>
+            <div style={{ textAlign: "center", paddingTop: "10px" }}>
+              <button onClick={() => addLink()}>Add Link</button>
             </div>
-            <div>source platform:{potentialLinkData.sourcePlatformId}</div>
-            <div>dest platform:{potentialLinkData.destPlatformId}</div>
-            <div>source currency:{potentialLinkData.sourceCurrencyId}</div>
-            <div>dest currency:{potentialLinkData.destCurrencyId}</div>
-            <div>action id:{potentialLinkData.actionId}</div>
-            <div>
-              duration: <input />{" "}
-              <select>
-                <option>seconds</option>
-                <option>minutes</option>
-                <option>hours</option>
-                <option>days</option>
-              </select>
-            </div>
-            <button onClick={() => setCreateLinkPopupVisibility(true)}>
-              X
-            </button>
           </CreateLinkContent>
-        </CreateLinkPopover>
+        </CreateLinkOverlay>
       </Hide>
       <DragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragUpdate}>
         <Container>
-          <StateContainer>
-            <Title>States</Title>
+          <WalletContainer>
+            <Title>Wallets</Title>
             <button
-              onClick={() => setAddStateUnitPopupVisibility((prev) => !prev)}
+              onClick={() => setAddWalletUnitPopupVisibility((prev) => !prev)}
             >
               Add new +
             </button>
-            <Hide when={addStateUnitPopupVisibility}>
-              <StateAdderPopup>
+            <Hide when={addWalletUnitPopupVisibility}>
+              <UnitAdderPopup>
                 Platform:
                 <select onChange={selectPlatform}>
                   {appState.platforms.map((platform) => (
@@ -305,39 +435,40 @@ function App() {
                   ))}
                 </select>
                 <br />
-                <button onClick={addState}>Add </button>
-              </StateAdderPopup>
+                <button onClick={addWallet}>Add </button>
+              </UnitAdderPopup>
             </Hide>
             <Droppable
-              droppableId="states"
+              droppableId="wallets"
               direction="horizontal"
               // isDropDisabled={true}
             >
               {(provided) => (
-                <States {...provided.droppableProps} ref={provided.innerRef}>
-                  {appState.states?.map((stateUnit, index) => (
+                <Wallets {...provided.droppableProps} ref={provided.innerRef}>
+                  {appState.wallets?.map((walletUnit, index) => (
                     <Draggable
-                      draggableId={stateUnit.id}
+                      draggableId={walletUnit.id}
                       index={index}
-                      key={stateUnit.id}
+                      key={walletUnit.id}
                     >
                       {(provided) => (
-                        <StateUnit
+                        <WalletUnit
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           ref={provided.innerRef}
                         >
-                          {stateUnit.id} <br /> {stateUnit.platformId} <br />
-                          {stateUnit.currencyId}
-                        </StateUnit>
+                          <Tiny>{walletUnit.id}</Tiny> <br />{" "}
+                          {walletUnit.platformId} <br />
+                          {walletUnit.currencyId}
+                        </WalletUnit>
                       )}
                     </Draggable>
                   ))}
                   {provided.placeholder}
-                </States>
+                </Wallets>
               )}
             </Droppable>
-          </StateContainer>
+          </WalletContainer>
           <ActionContainer>
             <Title>Actions</Title>
             <Droppable droppableId="actions" direction="horizontal">
@@ -386,71 +517,130 @@ function App() {
                 Add new +
               </button>
               <Hide when={addRecipePopupVisibility}>
-                <StateAdderPopup>
+                <UnitAdderPopup>
                   Name:
                   <input onChange={changeRecipeName} value={newRecipeName} />
                   <br />
                   <button onClick={addRecipe}>Add </button>
-                </StateAdderPopup>
+                </UnitAdderPopup>
               </Hide>
             </div>
             {appState.recipeOrder?.map((recipeId) => (
-              <Droppable
-                droppableId={recipeId}
-                direction="horizontal"
-                key={recipeId}
-              >
-                {(provided) => (
-                  <Recipe {...provided.droppableProps} ref={provided.innerRef}>
-                    <RecipeName>{`${
-                      appState.recipes[recipeId].name
-                    }(${getPlatformNameByIngredientId(
-                      appState.recipes[recipeId]?.ingredientList[0]?.unitId
-                    )}(${getCurrencyNameByIngredientId(
-                      appState.recipes[recipeId]?.ingredientList[0]?.unitId
-                    )}) - ${getPlatformNameByIngredientId(
-                      appState.recipes[recipeId]?.ingredientList?.at(-1)?.unitId
-                    )}(${getCurrencyNameByIngredientId(
-                      appState.recipes[recipeId]?.ingredientList?.at(-1)?.unitId
-                    )}))`}</RecipeName>
-                    {appState.recipes[recipeId].ingredientList?.map(
-                      (ingredient, index) => (
-                        <Draggable
-                          draggableId={ingredient.id}
-                          index={index}
-                          key={ingredient.id}
-                        >
-                          {(provided) => {
-                            return (
-                              <IngredientUnit
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                ref={provided.innerRef}
-                              >
-                                {ingredient.id} <br /> {ingredient.unitId}{" "}
-                                <br />
-                                {
-                                  getStateById(ingredient.unitId)?.[
-                                    "platformId"
-                                  ]
-                                }{" "}
-                                <br />
-                                {
-                                  getStateById(ingredient.unitId)?.[
-                                    "currencyId"
-                                  ]
-                                }
-                              </IngredientUnit>
-                            );
-                          }}
-                        </Draggable>
-                      )
-                    )}
-
-                    {provided.placeholder}
-                  </Recipe>
-                )}
-              </Droppable>
+              <div key={`a${recipeId}`}>
+                <Droppable
+                  droppableId={recipeId}
+                  direction="horizontal"
+                  key={recipeId}
+                >
+                  {(provided) => (
+                    <Recipe
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                    >
+                      <RecipeName>
+                        {`${
+                          appState.recipes[recipeId].name
+                        }(${getPlatformNameByIngredientId(
+                          appState.recipes[recipeId]?.ingredientList[0]?.unitId
+                        )}(${getCurrencyNameByIngredientId(
+                          appState.recipes[recipeId]?.ingredientList[0]?.unitId
+                        )}) -> ${getPlatformNameByIngredientId(
+                          appState.recipes[recipeId]?.ingredientList?.at(-1)
+                            ?.unitId
+                        )}(${getCurrencyNameByIngredientId(
+                          appState.recipes[recipeId]?.ingredientList?.at(-1)
+                            ?.unitId
+                        )}))`}{" "}
+                        Total duration: {calculateTotalRecipeDuration(recipeId)}
+                      </RecipeName>
+                      {appState.recipes[recipeId].ingredientList?.map(
+                        (ingredient, index) => (
+                          <Draggable
+                            draggableId={ingredient.id}
+                            index={index}
+                            key={ingredient.id}
+                          >
+                            {(provided) => {
+                              return ingredient.type === "wallet" ? (
+                                <IngredientWallet
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  ref={provided.innerRef}
+                                >
+                                  <Tiny>
+                                    {ingredient.id} <br /> {ingredient.unitId}
+                                  </Tiny>
+                                  <br />
+                                  {
+                                    getWalletById(ingredient.unitId)?.[
+                                      "platformId"
+                                    ]
+                                  }{" "}
+                                  <br />
+                                  {
+                                    getWalletById(ingredient.unitId)?.[
+                                      "currencyId"
+                                    ]
+                                  }
+                                </IngredientWallet>
+                              ) : (
+                                <IngredientAction
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  ref={provided.innerRef}
+                                >
+                                  <Arrow>&lt;</Arrow>
+                                  <div>
+                                    <Tiny>
+                                      {ingredient.id} <br /> {ingredient.unitId}
+                                    </Tiny>
+                                    <br />
+                                    <div>
+                                      {getLinkById(ingredient.unitId)?.["name"]}
+                                    </div>
+                                    <Small>
+                                      <div>
+                                        Duration:
+                                        {
+                                          getLinkById(ingredient.unitId)?.[
+                                            "duration"
+                                          ]
+                                        }
+                                      </div>
+                                      <div>
+                                        Cost:
+                                        {
+                                          getLinkById(ingredient.unitId)?.[
+                                            "costFix"
+                                          ]
+                                        }
+                                      </div>
+                                    </Small>
+                                  </div>
+                                  <Arrow>&gt;</Arrow>
+                                </IngredientAction>
+                              );
+                            }}
+                          </Draggable>
+                        )
+                      )}
+                      {provided.placeholder}
+                    </Recipe>
+                  )}
+                </Droppable>
+                <RecipeMeta>
+                  <div>
+                    Approve: {appState.recipes[recipeId]?.approveCount}
+                    <button onClick={() => approveRecipe(recipeId)}>👍</button>
+                  </div>
+                  <div>
+                    Disapprove: {appState.recipes[recipeId]?.disapproveCount}
+                    <button onClick={() => disapproveRecipe(recipeId)}>
+                      👎
+                    </button>
+                  </div>
+                </RecipeMeta>
+              </div>
             ))}
           </RecipeContainer>
         </Container>
@@ -460,7 +650,7 @@ function App() {
 }
 export default App;
 
-const CreateLinkPopover = styled.div`
+const CreateLinkOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
@@ -473,13 +663,32 @@ const CreateLinkPopover = styled.div`
   justify-content: center;
   align-items: center;
 `;
-const CreateLinkContent = styled.div``;
+const CreateLinkContent = styled.div`
+  background-color: rgba(90, 90, 90, 0.8);
+  padding: 10px;
+  border-radius: 5px;
+  color: white;
+  position: relative;
+`;
+const CloseButtonContainer = styled.div`
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  display: inline-block;
+`;
+
+const CreateLinkData = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 5px 10px;
+  padding-top: 10px;
+`;
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 200px 70px 1fr;
+  grid-template-rows: 200px 30px 1fr;
   grid-template-columns: 1fr 1fr;
-  grid-template-areas: "states actions" "filters filters" "recipes recipes";
+  grid-template-areas: "wallets actions" "filters filters" "recipes recipes";
   & > * {
     border: 1px solid black;
   }
@@ -488,8 +697,8 @@ const Container = styled.div`
 const FilterContainer = styled.div`
   grid-area: filters;
 `;
-const StateContainer = styled.div`
-  grid-area: states;
+const WalletContainer = styled.div`
+  grid-area: wallets;
 `;
 const ActionContainer = styled.div`
   grid-area: actions;
@@ -499,7 +708,7 @@ const Actions = styled.div`
   flex-direction: row;
   padding: 10px;
 `;
-const States = styled.div`
+const Wallets = styled.div`
   display: flex;
   flex-direction: row;
   padding: 10px;
@@ -511,6 +720,7 @@ const Indicator = styled.div<IndicatorProps>`
   height: 30px;
   overflow: hidden;
   text-align: center;
+  color: green;
   visibility: ${(props) => (props.hide ? "hidden" : "visible")};
 `;
 
@@ -522,11 +732,23 @@ const Unit = styled.div`
   text-align: center;
   margin: 0 7px;
 `;
-const StateUnit = styled(Unit)``;
-const IngredientUnit = styled(Unit)``;
+const WalletUnit = styled(Unit)``;
+const IngredientWallet = styled(Unit)``;
+const IngredientAction = styled(Unit)`
+  z-index: 2;
+  display: flex;
+  margin-left: 0;
+  margin-right: 0;
+`;
 const ActionUnit = styled(Unit)``;
+const Arrow = styled.div`
+  align-self: center;
+  transform: scaleY(11);
+  position: relative;
+  top: -15px;
+`;
 
-const StateAdderPopup = styled.div`
+const UnitAdderPopup = styled.div`
   /* position: absolute;*/
   z-index: 10;
 `;
@@ -544,6 +766,14 @@ const RecipeName = styled.h5`
   display: inline-block;
   top: 1px;
 `;
+const RecipeMeta = styled.div`
+  background-color: gray;
+  display: flex;
+  gap: 30px;
+  padding-left: 15px;
+  color: white;
+`;
+
 const Recipe = styled.div`
   display: flex;
   position: relative;
@@ -552,6 +782,13 @@ const Recipe = styled.div`
   flex-direction: row;
   flex-wrap: wrap;
   padding: 20px 10px 10px;
-  margin: 5px 0;
+  margin: 5px 0 0;
   background-color: lightgreen;
+`;
+
+const Small = styled.span`
+  font-size: 0.75rem;
+`;
+const Tiny = styled.span`
+  font-size: 0.5rem;
 `;

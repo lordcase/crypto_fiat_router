@@ -52,21 +52,18 @@ const initialData: AppData = {
       mode: "editable",
     },
   ],
-  states: [],
-  stateOrder: [],
+  wallets: [],
+  walletOrder: [],
   recipes: {
     recipe_GGUBbciNODYsieVAv5qzb: {
       id: "recipe_GGUBbciNODYsieVAv5qzb",
-      name: "kettoooo",
+      name: "Sample recipe",
       ingredientList: [],
-    },
-    recipe_111BbciNODYsieVAv5qzb: {
-      id: "recipe_111BbciNODYsieVAv5qzb",
-      name: "egggy",
-      ingredientList: [],
+      approveCount: 0,
+      disapproveCount: 0,
     },
   },
-  recipeOrder: ["recipe_GGUBbciNODYsieVAv5qzb", "recipe_111BbciNODYsieVAv5qzb"],
+  recipeOrder: ["recipe_GGUBbciNODYsieVAv5qzb"],
 };
 
 export default initialData;

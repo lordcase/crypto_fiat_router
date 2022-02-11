@@ -17,7 +17,7 @@ export interface Action {
   name: string;
 }
 
-export interface State {
+export interface Wallet {
   id: string;
   platformId: string;
   currencyId: string;
@@ -31,15 +31,18 @@ export interface Recipe {
   id: string;
   name: string;
   ingredientList: Ingredient[];
+  approveCount?: number;
+  lastApproveTime?: number;
+  disapproveCount?: number;
+  lastDisapproveTime?: number;
 }
 
-export type IngredientType = "state" | "action";
+export type IngredientType = "wallet" | "action";
 
 export interface Ingredient {
   id: string;
   unitId: string;
   type: IngredientType;
-  index: number;
 }
 
 export type LinkStatus = "active" | "inactive";
@@ -47,8 +50,9 @@ export type LinkMode = "readonly" | "editable";
 
 export interface Link {
   id: string;
-  name: string;
+  name?: string;
   duration?: number;
+  durationUnit?: number;
   costFix?: number;
   costCurrencyId?: string;
   costPercentage?: number;
@@ -62,13 +66,18 @@ export interface Link {
   mode?: LinkMode;
 }
 
+export interface PotentialLink extends Link {
+  index?: number;
+  recipeId?: string;
+}
+
 export interface AppData {
   currencies: Currency[];
   platforms: Platform[];
   actions: Action[];
   links: Link[];
-  states: State[];
-  stateOrder: string[];
+  wallets: Wallet[];
+  walletOrder: string[];
   recipes: Recipes;
   recipeOrder: string[];
 }
