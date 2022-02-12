@@ -17,6 +17,7 @@ import {
 import Hide from "./common/Hide";
 import { Title, Tiny, Small, Unit } from "./common/styles";
 import ActionsTemp from "./components/Actions";
+import Overlay from "./common/Overlay";
 
 function App() {
   useEffect(() => {
@@ -347,7 +348,7 @@ function App() {
   return (
     <div>
       <Hide when={createLinkPopupVisibility}>
-        <CreateLinkOverlay>
+        <Overlay>
           <CreateLinkContent>
             <CloseButtonContainer>
               <button onClick={() => setCreateLinkPopupVisibility(true)}>
@@ -406,7 +407,7 @@ function App() {
               <button onClick={() => addLink()}>Add Link</button>
             </div>
           </CreateLinkContent>
-        </CreateLinkOverlay>
+        </Overlay>
       </Hide>
       <DragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragUpdate}>
         <Container>
@@ -618,19 +619,6 @@ function App() {
 }
 export default App;
 
-const CreateLinkOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(90, 90, 90, 0.2);
-  z-index: 2;
-  display: flex;
-  flex-direction: rows;
-  justify-content: center;
-  align-items: center;
-`;
 const CreateLinkContent = styled.div`
   background-color: rgba(90, 90, 90, 0.8);
   padding: 10px;
