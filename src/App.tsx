@@ -19,6 +19,7 @@ import { Title, Tiny, Small, Unit } from "./common/styles";
 import Overlay from "./common/Overlay";
 import CreateLink from "./components/CreateLink";
 import Actions from "./components/Actions";
+import Wallets from "./components/Wallets";
 
 function App() {
   useEffect(() => {
@@ -355,65 +356,14 @@ function App() {
       <DragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragUpdate}>
         <Container>
           <WalletContainer>
-            <Title>Wallets</Title>
-            <button
-              onClick={() => setAddWalletUnitPopupVisibility((prev) => !prev)}
-            >
-              Add new +
-            </button>
-            <Hide when={addWalletUnitPopupVisibility}>
-              <UnitAdderPopup>
-                Platform:
-                <select onChange={selectPlatform}>
-                  {appState.platforms.map((platform) => (
-                    <option key={platform.id} value={platform.id}>
-                      {platform.name}
-                    </option>
-                  ))}
-                </select>
-                <br />
-                Currency:
-                <select onChange={selectCurrency}>
-                  {appState.currencies.map((currency) => (
-                    <option key={currency.id} value={currency.id}>
-                      {currency.name}
-                    </option>
-                  ))}
-                </select>
-                <br />
-                <button onClick={addWallet}>Add </button>
-              </UnitAdderPopup>
-            </Hide>
-            <Droppable
-              droppableId="wallets"
-              direction="horizontal"
-              // isDropDisabled={true}
-            >
-              {(provided) => (
-                <Wallets {...provided.droppableProps} ref={provided.innerRef}>
-                  {appState.wallets?.map((walletUnit, index) => (
-                    <Draggable
-                      draggableId={walletUnit.id}
-                      index={index}
-                      key={walletUnit.id}
-                    >
-                      {(provided) => (
-                        <WalletUnit
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          ref={provided.innerRef}
-                        >
-                          <Tiny>{walletUnit.id}</Tiny> <br />{" "}
-                          {walletUnit.platformId} <br />
-                          {walletUnit.currencyId}
-                        </WalletUnit>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </Wallets>
-              )}
-            </Droppable>
+            <Wallets
+              appState={appState}
+              setAddWalletUnitPopupVisibility={setAddWalletUnitPopupVisibility}
+              addWalletUnitPopupVisibility={addWalletUnitPopupVisibility}
+              selectPlatform={selectPlatform}
+              selectCurrency={selectCurrency}
+              addWallet={addWallet}
+            />
           </WalletContainer>
           <ActionsContainer>
             <Actions
@@ -562,6 +512,11 @@ function App() {
 }
 export default App;
 
+const UnitAdderPopup = styled.div`
+  /* position: absolute;*/
+  z-index: 10;
+`;
+
 const Container = styled.div`
   display: grid;
   grid-template-rows: 200px 30px 1fr;
@@ -581,13 +536,6 @@ const WalletContainer = styled.div`
 const ActionsContainer = styled.div`
   grid-area: actions;
 `;
-const Wallets = styled.div`
-  display: flex;
-  flex-direction: row;
-  padding: 10px;
-`;
-
-const WalletUnit = styled(Unit)``;
 const IngredientWallet = styled(Unit)``;
 const IngredientAction = styled(Unit)`
   z-index: 2;
@@ -601,11 +549,6 @@ const Arrow = styled.div`
   transform: scaleY(11);
   position: relative;
   top: -15px;
-`;
-
-const UnitAdderPopup = styled.div`
-  /* position: absolute;*/
-  z-index: 10;
 `;
 
 const RouteContainer = styled.div`
