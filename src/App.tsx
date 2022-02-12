@@ -16,6 +16,7 @@ import {
 } from "./common/types";
 import Hide from "./common/Hide";
 import { Title, Tiny, Small, Unit } from "./common/styles";
+import ActionsTemp from "./components/Actions";
 
 function App() {
   useEffect(() => {
@@ -468,12 +469,16 @@ function App() {
               )}
             </Droppable>
           </WalletContainer>
-          <ActionContainer>
-            <Title>Actions</Title>
+          <ActionsContainer>
+            <ActionsTemp
+              appState={appState}
+              createLinkWarningVisibility={createLinkWarningVisibility}
+            />
+          </ActionsContainer>
+          {/* <Title>Actions</Title>
             <Droppable droppableId="actions" direction="horizontal">
               {(provided) => (
                 <Actions ref={provided.innerRef} {...provided.droppableProps}>
-                  {/* {JSON.stringify(snapshot)} */}
                   {appState.actions.map((action, index) => (
                     <Draggable
                       draggableId={action.id}
@@ -502,8 +507,7 @@ function App() {
                   {provided.placeholder}
                 </Actions>
               )}
-            </Droppable>
-          </ActionContainer>
+            </Droppable> */}
           <FilterContainer>
             <Title>Filters</Title>
           </FilterContainer>
@@ -694,28 +698,13 @@ const FilterContainer = styled.div`
 const WalletContainer = styled.div`
   grid-area: wallets;
 `;
-const ActionContainer = styled.div`
+const ActionsContainer = styled.div`
   grid-area: actions;
-`;
-const Actions = styled.div`
-  display: flex;
-  flex-direction: row;
-  padding: 10px;
 `;
 const Wallets = styled.div`
   display: flex;
   flex-direction: row;
   padding: 10px;
-`;
-interface IndicatorProps {
-  hide: boolean;
-}
-const Indicator = styled.div<IndicatorProps>`
-  height: 30px;
-  overflow: hidden;
-  text-align: center;
-  color: green;
-  visibility: ${(props) => (props.hide ? "hidden" : "visible")};
 `;
 
 const WalletUnit = styled(Unit)``;
@@ -726,7 +715,7 @@ const IngredientAction = styled(Unit)`
   margin-left: 0;
   margin-right: 0;
 `;
-const ActionUnit = styled(Unit)``;
+
 const Arrow = styled.div`
   align-self: center;
   transform: scaleY(11);
