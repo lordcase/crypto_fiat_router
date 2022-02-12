@@ -18,6 +18,7 @@ import Hide from "./common/Hide";
 import { Title, Tiny, Small, Unit } from "./common/styles";
 import ActionsTemp from "./components/Actions";
 import Overlay from "./common/Overlay";
+import CreateLink from "./components/CreateLink";
 
 function App() {
   useEffect(() => {
@@ -45,7 +46,7 @@ function App() {
     id: "",
     name: "",
     costFix: "",
-    duration: "",
+    duration: "23",
   });
 
   const addWallet = () => {
@@ -212,18 +213,10 @@ function App() {
     setPotentialLinkData((prev) => ({ ...prev, [field]: event.target.value }));
   };
   const calculateTotalRouteDuration = (routeId: string) => {
-    console.log("whoa");
-
     const links = appState.routes[routeId].ingredientList.filter(
       (ingredient) => ingredient.type === "action"
     );
     const duration: number = links.reduce((acc, curr, index) => {
-      console.log(
-        "heyy",
-        index,
-        acc,
-        appState.links.find((link) => link.id === curr.unitId)?.["duration"]
-      );
       const currUnit = appState.links.find((link) => link.id === curr.unitId);
       return currUnit ? (currUnit.duration ? currUnit.duration : 0) : 0;
     }, 0);
@@ -313,6 +306,8 @@ function App() {
             actionId: draggableId,
             routeId: destId,
             index: index,
+            duration: "",
+            costFix: "",
           });
           setCreateLinkPopupVisibility(false);
         }
@@ -349,64 +344,12 @@ function App() {
     <div>
       <Hide when={createLinkPopupVisibility}>
         <Overlay>
-          <CreateLinkContent>
-            <CloseButtonContainer>
-              <button onClick={() => setCreateLinkPopupVisibility(true)}>
-                X
-              </button>
-            </CloseButtonContainer>
-            <CreateLinkData>
-              <div>id: </div>
-              <div>{potentialLinkData.id}</div>
-              <div>name: </div>
-              <div>
-                <input
-                  value={potentialLinkData.name}
-                  onChange={changePotentialLinkData}
-                  data-field="name"
-                />
-              </div>
-              <div>source platform:</div>
-              <div>{potentialLinkData.sourcePlatformId}</div>
-              <div>dest platform:</div>
-              <div>{potentialLinkData.destPlatformId}</div>
-              <div>source currency:</div>
-              <div>{potentialLinkData.sourceCurrencyId}</div>
-              <div>dest currency:</div>
-              <div>{potentialLinkData.destCurrencyId}</div>
-              <div>action id:</div>
-              <div>{potentialLinkData.actionId}</div>
-              <div>Cost:</div>
-              <div>
-                <input
-                  value={potentialLinkData.costFix}
-                  data-field="costFix"
-                  onChange={changePotentialLinkData}
-                />
-              </div>
-              <div>duration:</div>
-              <div>
-                <input
-                  value={potentialLinkData.duration}
-                  data-field="duration"
-                  onChange={changePotentialLinkData}
-                />
-                <select
-                  value={potentialLinkData.durationUnit}
-                  onChange={changePotentialLinkData}
-                  data-field="durationUnit"
-                >
-                  <option value="1">seconds</option>
-                  <option value="60">minutes</option>
-                  <option value="3600">hours</option>
-                  <option value="86400">days</option>
-                </select>
-              </div>
-            </CreateLinkData>
-            <div style={{ textAlign: "center", paddingTop: "10px" }}>
-              <button onClick={() => addLink()}>Add Link</button>
-            </div>
-          </CreateLinkContent>
+          <CreateLink
+            potentialLinkData={potentialLinkData}
+            changePotentialLinkData={changePotentialLinkData}
+            setCreateLinkPopupVisibility={setCreateLinkPopupVisibility}
+            addLink={addLink}
+          />
         </Overlay>
       </Hide>
       <DragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragUpdate}>
