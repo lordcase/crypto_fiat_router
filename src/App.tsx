@@ -43,6 +43,8 @@ function App() {
   const [potentialLinkData, setPotentialLinkData] = useState<PotentialLink>({
     id: "",
     name: "",
+    costFix: "",
+    duration: "",
   });
 
   const addWallet = () => {
@@ -475,39 +477,7 @@ function App() {
               createLinkWarningVisibility={createLinkWarningVisibility}
             />
           </ActionsContainer>
-          {/* <Title>Actions</Title>
-            <Droppable droppableId="actions" direction="horizontal">
-              {(provided) => (
-                <Actions ref={provided.innerRef} {...provided.droppableProps}>
-                  {appState.actions.map((action, index) => (
-                    <Draggable
-                      draggableId={action.id}
-                      index={index}
-                      key={action.id}
-                    >
-                      {(provided, snapshot) => (
-                        <ActionUnit
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          ref={provided.innerRef}
-                        >
-                          {action.name}
-                          <Indicator
-                            hide={
-                              createLinkWarningVisibility ||
-                              !snapshot.isDragging
-                            }
-                          >
-                            !DROP TO LINK!
-                          </Indicator>
-                        </ActionUnit>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </Actions>
-              )}
-            </Droppable> */}
+
           <FilterContainer>
             <Title>Filters</Title>
           </FilterContainer>
