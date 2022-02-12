@@ -16,9 +16,9 @@ import {
 } from "./common/types";
 import Hide from "./common/Hide";
 import { Title, Tiny, Small, Unit } from "./common/styles";
-import ActionsTemp from "./components/Actions";
 import Overlay from "./common/Overlay";
 import CreateLink from "./components/CreateLink";
+import Actions from "./components/Actions";
 
 function App() {
   useEffect(() => {
@@ -416,7 +416,7 @@ function App() {
             </Droppable>
           </WalletContainer>
           <ActionsContainer>
-            <ActionsTemp
+            <Actions
               appState={appState}
               createLinkWarningVisibility={createLinkWarningVisibility}
             />
@@ -561,27 +561,6 @@ function App() {
   );
 }
 export default App;
-
-const CreateLinkContent = styled.div`
-  background-color: rgba(90, 90, 90, 0.8);
-  padding: 10px;
-  border-radius: 5px;
-  color: white;
-  position: relative;
-`;
-const CloseButtonContainer = styled.div`
-  position: absolute;
-  right: 5px;
-  top: 5px;
-  display: inline-block;
-`;
-
-const CreateLinkData = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 5px 10px;
-  padding-top: 10px;
-`;
 
 const Container = styled.div`
   display: grid;

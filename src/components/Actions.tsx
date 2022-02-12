@@ -4,7 +4,7 @@ import { Droppable, Draggable } from "react-beautiful-dnd";
 import { Title, Unit } from "../common/styles";
 import { AppData } from "../common/types";
 
-const ActionsTemp = ({ appState, createLinkWarningVisibility }: Props) => {
+const Actions = ({ appState, createLinkWarningVisibility }: Props) => {
   return (
     <>
       <Title>Actions</Title>
@@ -39,7 +39,7 @@ const ActionsTemp = ({ appState, createLinkWarningVisibility }: Props) => {
   );
 };
 
-export default ActionsTemp;
+export default Actions;
 
 type Props = {
   appState: AppData;
