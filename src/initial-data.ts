@@ -54,16 +54,16 @@ const initialData: AppData = {
   ],
   wallets: [],
   walletOrder: [],
-  recipes: {
-    recipe_GGUBbciNODYsieVAv5qzb: {
-      id: "recipe_GGUBbciNODYsieVAv5qzb",
-      name: "Sample recipe",
+  routes: {
+    route_GGUBbciNODYsieVAv5qzb: {
+      id: "route_GGUBbciNODYsieVAv5qzb",
+      name: "Sample route",
       ingredientList: [],
       approveCount: 0,
       disapproveCount: 0,
     },
   },
-  recipeOrder: ["recipe_GGUBbciNODYsieVAv5qzb"],
+  routeOrder: ["route_GGUBbciNODYsieVAv5qzb"],
 };
 
 export default initialData;

@@ -23,11 +23,11 @@ export interface Wallet {
   currencyId: string;
 }
 
-export interface Recipes {
-  [id: string]: Recipe;
+export interface Routes {
+  [id: string]: Route;
 }
 
-export interface Recipe {
+export interface Route {
   id: string;
   name: string;
   ingredientList: Ingredient[];
@@ -68,7 +68,7 @@ export interface Link {
 
 export interface PotentialLink extends Link {
   index?: number;
-  recipeId?: string;
+  routeId?: string;
 }
 
 export interface AppData {
@@ -78,6 +78,6 @@ export interface AppData {
   links: Link[];
   wallets: Wallet[];
   walletOrder: string[];
-  recipes: Recipes;
-  recipeOrder: string[];
+  routes: Routes;
+  routeOrder: string[];
 }

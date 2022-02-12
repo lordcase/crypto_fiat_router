@@ -15,6 +15,7 @@ import {
   IngredientType,
 } from "./common/types";
 import Hide from "./common/Hide";
+import { Title, Tiny, Small, Unit } from "./common/styles";
 
 function App() {
   useEffect(() => {
@@ -29,14 +30,14 @@ function App() {
   const [newWalletUnitCurrency, setNewWalletUnitCurrency] = useState<string>(
     initialData.currencies[0].id
   );
-  const [newRecipeName, setNewRecipeName] = useState<string>("");
+  const [newRouteName, setNewRouteName] = useState<string>("");
   const [addWalletUnitPopupVisibility, setAddWalletUnitPopupVisibility] =
     useState<boolean>(true);
   const [createLinkWarningVisibility, setCreateLinkWarningVisibility] =
     useState<boolean>(true);
   const [createLinkPopupVisibility, setCreateLinkPopupVisibility] =
     useState<boolean>(true);
-  const [addRecipePopupVisibility, setAddRecipePopupVisibility] =
+  const [addRoutePopupVisibility, setAddRoutePopupVisibility] =
     useState<boolean>(true);
   const [potentialLinkData, setPotentialLinkData] = useState<PotentialLink>({
     id: "",
@@ -55,15 +56,15 @@ function App() {
     }));
   };
 
-  const addRecipe = () => {
-    const newId = `recipe_${nanoid()}`;
+  const addRoute = () => {
+    const newId = `route_${nanoid()}`;
     setAppState((prev) => ({
       ...prev,
-      recipes: {
-        ...prev.recipes,
+      routes: {
+        ...prev.routes,
         [newId]: {
           id: newId,
-          name: newRecipeName,
+          name: newRouteName,
           approveCount: 0,
           disapproveCount: 0,
           ingredientList: [],
@@ -72,7 +73,7 @@ function App() {
     }));
     setAppState((prev) => ({
       ...prev,
-      recipeOrder: [...(prev.recipeOrder || []), newId],
+      routeOrder: [...(prev.routeOrder || []), newId],
     }));
   };
 
@@ -86,10 +87,10 @@ function App() {
       costFix: costFix,
       durationUnit: durationUnit,
     };
-    if (potentialLinkData.recipeId) {
+    if (potentialLinkData.routeId) {
       setAppState((prev) => {
-        const recipe = prev.recipes[potentialLinkData.recipeId || 0];
-        const ingredientList = recipe.ingredientList;
+        const route = prev.routes[potentialLinkData.routeId || 0];
+        const ingredientList = route.ingredientList;
         const index = potentialLinkData
           ? potentialLinkData.index
             ? potentialLinkData.index
@@ -104,11 +105,11 @@ function App() {
           },
           ...ingredientList.slice(potentialLinkData.index),
         ];
-        const newRecipe = { ...recipe, ingredientList: newIngredientList };
+        const newRoute = { ...route, ingredientList: newIngredientList };
         return {
           ...prev,
           links: [...prev.links, newLink],
-          recipes: { ...prev.recipes, [recipe.id]: newRecipe },
+          routes: { ...prev.routes, [route.id]: newRoute },
         };
       });
     }
@@ -139,33 +140,31 @@ function App() {
     const value = event.target.value;
     setNewWalletUnitCurrency(value);
   };
-  const changeRecipeName = (
+  const changeRouteName = (
     event: React.ChangeEvent<HTMLInputElement>
   ): void => {
     const value = event.target.value;
-    setNewRecipeName(value);
+    setNewRouteName(value);
   };
-  const approveRecipe = (recipeId: string) => {
+  const approveRoute = (routeId: string) => {
     setAppState((prev) => {
-      const recipe = appState.recipes[recipeId];
-      const newRecipe = {
-        ...recipe,
-        approveCount: recipe.approveCount ? recipe.approveCount + 1 : 1,
+      const route = appState.routes[routeId];
+      const newRoute = {
+        ...route,
+        approveCount: route.approveCount ? route.approveCount + 1 : 1,
       };
-      return { ...prev, recipes: { ...prev.recipes, [recipeId]: newRecipe } };
+      return { ...prev, routes: { ...prev.routes, [routeId]: newRoute } };
     });
   };
 
-  const disapproveRecipe = (recipeId: string) => {
+  const disapproveRoute = (routeId: string) => {
     setAppState((prev) => {
-      const recipe = appState.recipes[recipeId];
-      const newRecipe = {
-        ...recipe,
-        disapproveCount: recipe.disapproveCount
-          ? recipe.disapproveCount + 1
-          : 1,
+      const route = appState.routes[routeId];
+      const newRoute = {
+        ...route,
+        disapproveCount: route.disapproveCount ? route.disapproveCount + 1 : 1,
       };
-      return { ...prev, recipes: { ...prev.recipes, [recipeId]: newRecipe } };
+      return { ...prev, routes: { ...prev.routes, [routeId]: newRoute } };
     });
   };
 
@@ -208,10 +207,10 @@ function App() {
     const field = event.target.dataset["field"] as string;
     setPotentialLinkData((prev) => ({ ...prev, [field]: event.target.value }));
   };
-  const calculateTotalRecipeDuration = (recipeId: string) => {
+  const calculateTotalRouteDuration = (routeId: string) => {
     console.log("whoa");
 
-    const links = appState.recipes[recipeId].ingredientList.filter(
+    const links = appState.routes[routeId].ingredientList.filter(
       (ingredient) => ingredient.type === "action"
     );
     const duration: number = links.reduce((acc, curr, index) => {
@@ -232,12 +231,12 @@ function App() {
       setCreateLinkWarningVisibility(true);
       return;
     }
-    if (!appState.recipes[data.destination.droppableId]?.ingredientList) {
+    if (!appState.routes[data.destination.droppableId]?.ingredientList) {
       setCreateLinkWarningVisibility(true);
       return;
     }
     const ingredientList =
-      appState.recipes[data.destination.droppableId]?.ingredientList;
+      appState.routes[data.destination.droppableId]?.ingredientList;
     const index = data.destination.index;
     if (
       data.draggableId.search("action") !== -1 &&
@@ -255,24 +254,24 @@ function App() {
     if (!destination) return;
     if (reason !== "DROP") return;
     const destId = destination.droppableId;
-    if (destination.droppableId.includes("recipe")) {
-      const currentRecipe = appState.recipes[destId];
+    if (destination.droppableId.includes("route")) {
+      const currentRoute = appState.routes[destId];
       if (source.droppableId === "wallets") {
         const newId = nanoid();
         setAppState((prev) => ({
           ...prev,
-          recipes: {
-            ...prev.recipes,
+          routes: {
+            ...prev.routes,
             [destId]: {
-              ...prev.recipes[destId],
+              ...prev.routes[destId],
               ingredientList: [
-                ...currentRecipe.ingredientList?.slice(0, destination.index),
+                ...currentRoute.ingredientList?.slice(0, destination.index),
                 {
                   id: newId,
                   unitId: draggableId,
                   type: getUnitTypeById(draggableId),
                 },
-                ...currentRecipe.ingredientList?.slice(destination.index),
+                ...currentRoute.ingredientList?.slice(destination.index),
               ],
             },
           },
@@ -283,7 +282,7 @@ function App() {
           (action) => action.id === draggableId
         );
         const ingredientList =
-          appState.recipes[destination.droppableId].ingredientList;
+          appState.routes[destination.droppableId].ingredientList;
         if (
           ingredientList[index - 1]?.type === "wallet" &&
           ingredientList[index]?.type === "wallet"
@@ -308,7 +307,7 @@ function App() {
             sourceCurrencyId: sourceCurrency.id,
             destCurrencyId: destCurrency.id,
             actionId: draggableId,
-            recipeId: destId,
+            routeId: destId,
             index: index,
           });
           setCreateLinkPopupVisibility(false);
@@ -316,14 +315,14 @@ function App() {
       } else if (source.droppableId === destination.droppableId) {
         setAppState((prev) => {
           const step1 = [
-            ...currentRecipe.ingredientList.slice(0, source.index),
-            ...currentRecipe.ingredientList.slice(source.index + 1),
+            ...currentRoute.ingredientList.slice(0, source.index),
+            ...currentRoute.ingredientList.slice(source.index + 1),
           ];
           const step2 = [
             ...step1.slice(0, destination.index),
             {
               id: draggableId,
-              unitId: prev.recipes[destId].ingredientList.find(
+              unitId: prev.routes[destId].ingredientList.find(
                 (ingredient) => ingredient.id === draggableId
               )?.unitId,
               type: getUnitTypeById(draggableId),
@@ -332,9 +331,9 @@ function App() {
           ];
           return {
             ...prev,
-            recipes: {
-              ...prev.recipes,
-              [destId]: { ...prev.recipes[destId], ingredientList: step2 },
+            routes: {
+              ...prev.routes,
+              [destId]: { ...prev.routes[destId], ingredientList: step2 },
             },
           };
         });
@@ -508,52 +507,49 @@ function App() {
           <FilterContainer>
             <Title>Filters</Title>
           </FilterContainer>
-          <RecipeContainer>
-            <Title>Recipes</Title>
+          <RouteContainer>
+            <Title>Routes</Title>
             <div>
               <button
-                onClick={() => setAddRecipePopupVisibility((prev) => !prev)}
+                onClick={() => setAddRoutePopupVisibility((prev) => !prev)}
               >
                 Add new +
               </button>
-              <Hide when={addRecipePopupVisibility}>
+              <Hide when={addRoutePopupVisibility}>
                 <UnitAdderPopup>
                   Name:
-                  <input onChange={changeRecipeName} value={newRecipeName} />
+                  <input onChange={changeRouteName} value={newRouteName} />
                   <br />
-                  <button onClick={addRecipe}>Add </button>
+                  <button onClick={addRoute}>Add </button>
                 </UnitAdderPopup>
               </Hide>
             </div>
-            {appState.recipeOrder?.map((recipeId) => (
-              <div key={`a${recipeId}`}>
+            {appState.routeOrder?.map((routeId) => (
+              <div key={`a${routeId}`}>
                 <Droppable
-                  droppableId={recipeId}
+                  droppableId={routeId}
                   direction="horizontal"
-                  key={recipeId}
+                  key={routeId}
                 >
                   {(provided) => (
-                    <Recipe
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                    >
-                      <RecipeName>
+                    <Route {...provided.droppableProps} ref={provided.innerRef}>
+                      <RouteName>
                         {`${
-                          appState.recipes[recipeId].name
+                          appState.routes[routeId].name
                         }(${getPlatformNameByIngredientId(
-                          appState.recipes[recipeId]?.ingredientList[0]?.unitId
+                          appState.routes[routeId]?.ingredientList[0]?.unitId
                         )}(${getCurrencyNameByIngredientId(
-                          appState.recipes[recipeId]?.ingredientList[0]?.unitId
+                          appState.routes[routeId]?.ingredientList[0]?.unitId
                         )}) -> ${getPlatformNameByIngredientId(
-                          appState.recipes[recipeId]?.ingredientList?.at(-1)
+                          appState.routes[routeId]?.ingredientList?.at(-1)
                             ?.unitId
                         )}(${getCurrencyNameByIngredientId(
-                          appState.recipes[recipeId]?.ingredientList?.at(-1)
+                          appState.routes[routeId]?.ingredientList?.at(-1)
                             ?.unitId
                         )}))`}{" "}
-                        Total duration: {calculateTotalRecipeDuration(recipeId)}
-                      </RecipeName>
-                      {appState.recipes[recipeId].ingredientList?.map(
+                        Total duration: {calculateTotalRouteDuration(routeId)}
+                      </RouteName>
+                      {appState.routes[routeId].ingredientList?.map(
                         (ingredient, index) => (
                           <Draggable
                             draggableId={ingredient.id}
@@ -625,24 +621,22 @@ function App() {
                         )
                       )}
                       {provided.placeholder}
-                    </Recipe>
+                    </Route>
                   )}
                 </Droppable>
-                <RecipeMeta>
+                <RouteMeta>
                   <div>
-                    Approve: {appState.recipes[recipeId]?.approveCount}
-                    <button onClick={() => approveRecipe(recipeId)}>👍</button>
+                    Approve: {appState.routes[routeId]?.approveCount}
+                    <button onClick={() => approveRoute(routeId)}>👍</button>
                   </div>
                   <div>
-                    Disapprove: {appState.recipes[recipeId]?.disapproveCount}
-                    <button onClick={() => disapproveRecipe(recipeId)}>
-                      👎
-                    </button>
+                    Disapprove: {appState.routes[routeId]?.disapproveCount}
+                    <button onClick={() => disapproveRoute(routeId)}>👎</button>
                   </div>
-                </RecipeMeta>
+                </RouteMeta>
               </div>
             ))}
-          </RecipeContainer>
+          </RouteContainer>
         </Container>
       </DragDropContext>
     </div>
@@ -688,7 +682,7 @@ const Container = styled.div`
   display: grid;
   grid-template-rows: 200px 30px 1fr;
   grid-template-columns: 1fr 1fr;
-  grid-template-areas: "wallets actions" "filters filters" "recipes recipes";
+  grid-template-areas: "wallets actions" "filters filters" "routes routes";
   & > * {
     border: 1px solid black;
   }
@@ -724,14 +718,6 @@ const Indicator = styled.div<IndicatorProps>`
   visibility: ${(props) => (props.hide ? "hidden" : "visible")};
 `;
 
-const Unit = styled.div`
-  padding: 5px;
-  background: lightgray;
-  border-radius: 5px;
-  border: 1px solid gray;
-  text-align: center;
-  margin: 0 7px;
-`;
 const WalletUnit = styled(Unit)``;
 const IngredientWallet = styled(Unit)``;
 const IngredientAction = styled(Unit)`
@@ -753,20 +739,17 @@ const UnitAdderPopup = styled.div`
   z-index: 10;
 `;
 
-const Title = styled.h3`
-  margin: 5px;
-`;
-const RecipeContainer = styled.div`
-  grid-area: recipes;
+const RouteContainer = styled.div`
+  grid-area: routes;
   position: relative;
 `;
-const RecipeName = styled.h5`
+const RouteName = styled.h5`
   margin: 5px;
   position: absolute;
   display: inline-block;
   top: 1px;
 `;
-const RecipeMeta = styled.div`
+const RouteMeta = styled.div`
   background-color: gray;
   display: flex;
   gap: 30px;
@@ -774,7 +757,7 @@ const RecipeMeta = styled.div`
   color: white;
 `;
 
-const Recipe = styled.div`
+const Route = styled.div`
   display: flex;
   position: relative;
   min-width: 100px;
@@ -784,11 +767,4 @@ const Recipe = styled.div`
   padding: 20px 10px 10px;
   margin: 5px 0 0;
   background-color: lightgreen;
-`;
-
-const Small = styled.span`
-  font-size: 0.75rem;
-`;
-const Tiny = styled.span`
-  font-size: 0.5rem;
 `;
