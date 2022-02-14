@@ -5,7 +5,6 @@ import initialData from "./initial-data";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { nanoid } from "nanoid";
 import {
-  Action,
   AppData,
   Link,
   Wallet,
@@ -373,7 +372,7 @@ function App() {
           </ActionsContainer>
 
           <FilterContainer>
-            <Title>Fillters</Title>
+            <Title>Filters</Title>
           </FilterContainer>
           <RouteContainer>
             <Title>Routes</Title>
