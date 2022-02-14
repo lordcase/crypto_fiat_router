@@ -373,7 +373,7 @@ function App() {
           </ActionsContainer>
 
           <FilterContainer>
-            <Title>Filter</Title>
+            <Title>Filters</Title>
           </FilterContainer>
           <RouteContainer>
             <Title>Routes</Title>
