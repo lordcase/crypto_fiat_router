@@ -51,7 +51,7 @@ export type LinkMode = "readonly" | "editable";
 export interface Link {
   id: string;
   name?: string;
-  duration?: any;
+  duration?: number;
   durationUnit?: number;
   costFix?: number | "";
   costCurrencyId?: string;

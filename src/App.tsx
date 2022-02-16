@@ -47,7 +47,7 @@ function App() {
     id: "",
     name: "",
     costFix: "",
-    duration: "23",
+    duration: 23,
   });
 
   const addWallet = () => {
@@ -211,7 +211,17 @@ function App() {
     event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
   ): void => {
     const field = event.target.dataset["field"] as string;
-    setPotentialLinkData((prev) => ({ ...prev, [field]: event.target.value }));
+    if (event.target.dataset["field"] === "duration") {
+      setPotentialLinkData((prev) => ({
+        ...prev,
+        [field]: parseInt(event.target.value),
+      }));
+    } else {
+      setPotentialLinkData((prev) => ({
+        ...prev,
+        [field]: event.target.value,
+      }));
+    }
   };
   const calculateTotalRouteDuration = (routeId: string) => {
     const links = appState.routes[routeId].ingredientList.filter(
@@ -219,7 +229,10 @@ function App() {
     );
     const duration: number = links.reduce((acc, curr, index) => {
       const currUnit = appState.links.find((link) => link.id === curr.unitId);
-      return currUnit ? (currUnit.duration ? currUnit.duration : 0) : 0;
+      console.log(typeof acc);
+      console.log(typeof currUnit?.duration);
+
+      return acc + (currUnit ? (currUnit.duration ? currUnit.duration : 0) : 0);
     }, 0);
     return duration;
   };
@@ -307,7 +320,7 @@ function App() {
             actionId: draggableId,
             routeId: destId,
             index: index,
-            duration: "",
+            duration: 0,
             costFix: "",
           });
           setCreateLinkPopupVisibility(false);
