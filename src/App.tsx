@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import styled from "styled-components";
 import initialData from "./initial-data";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext } from "react-beautiful-dnd";
 import { nanoid } from "nanoid";
 import {
   AppData,
@@ -14,11 +14,12 @@ import {
   IngredientType,
 } from "./common/types";
 import Hide from "./common/Hide";
-import { Title, Tiny, Small, Unit } from "./common/styles";
+import { Title } from "./common/styles";
 import Overlay from "./common/Overlay";
 import CreateLink from "./components/CreateLink";
 import Actions from "./components/Actions";
 import Wallets from "./components/Wallets";
+import Routes from "./components/Routes";
 
 function App() {
   useEffect(() => {
@@ -375,134 +376,21 @@ function App() {
             <Title>Filters</Title>
           </FilterContainer>
           <RouteContainer>
-            <Title>Routes</Title>
-            <div>
-              <button
-                onClick={() => setAddRoutePopupVisibility((prev) => !prev)}
-              >
-                Add new +
-              </button>
-              <Hide when={addRoutePopupVisibility}>
-                <UnitAdderPopup>
-                  Name:
-                  <input onChange={changeRouteName} value={newRouteName} />
-                  <br />
-                  <button onClick={addRoute}>Add </button>
-                </UnitAdderPopup>
-              </Hide>
-            </div>
-            {appState.routeOrder?.map((routeId) => (
-              <div key={`a${routeId}`}>
-                <Droppable
-                  droppableId={routeId}
-                  direction="horizontal"
-                  key={routeId}
-                >
-                  {(provided) => (
-                    <Route {...provided.droppableProps} ref={provided.innerRef}>
-                      <RouteName>
-                        {`${
-                          appState.routes[routeId].name
-                        }(${getPlatformNameByIngredientId(
-                          appState.routes[routeId]?.ingredientList[0]?.unitId
-                        )}(${getCurrencyNameByIngredientId(
-                          appState.routes[routeId]?.ingredientList[0]?.unitId
-                        )}) -> ${getPlatformNameByIngredientId(
-                          appState.routes[routeId]?.ingredientList?.at(-1)
-                            ?.unitId
-                        )}(${getCurrencyNameByIngredientId(
-                          appState.routes[routeId]?.ingredientList?.at(-1)
-                            ?.unitId
-                        )}))`}{" "}
-                        Total duration: {calculateTotalRouteDuration(routeId)}
-                      </RouteName>
-                      {appState.routes[routeId].ingredientList?.map(
-                        (ingredient, index) => (
-                          <Draggable
-                            draggableId={ingredient.id}
-                            index={index}
-                            key={ingredient.id}
-                          >
-                            {(provided) => {
-                              return ingredient.type === "wallet" ? (
-                                <IngredientWallet
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  ref={provided.innerRef}
-                                >
-                                  <Tiny>
-                                    {ingredient.id} <br /> {ingredient.unitId}
-                                  </Tiny>
-                                  <br />
-                                  {
-                                    getWalletById(ingredient.unitId)?.[
-                                      "platformId"
-                                    ]
-                                  }{" "}
-                                  <br />
-                                  {
-                                    getWalletById(ingredient.unitId)?.[
-                                      "currencyId"
-                                    ]
-                                  }
-                                </IngredientWallet>
-                              ) : (
-                                <IngredientAction
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  ref={provided.innerRef}
-                                >
-                                  <Arrow>&lt;</Arrow>
-                                  <div>
-                                    <Tiny>
-                                      {ingredient.id} <br /> {ingredient.unitId}
-                                    </Tiny>
-                                    <br />
-                                    <div>
-                                      {getLinkById(ingredient.unitId)?.["name"]}
-                                    </div>
-                                    <Small>
-                                      <div>
-                                        Duration:
-                                        {
-                                          getLinkById(ingredient.unitId)?.[
-                                            "duration"
-                                          ]
-                                        }
-                                      </div>
-                                      <div>
-                                        Cost:
-                                        {
-                                          getLinkById(ingredient.unitId)?.[
-                                            "costFix"
-                                          ]
-                                        }
-                                      </div>
-                                    </Small>
-                                  </div>
-                                  <Arrow>&gt;</Arrow>
-                                </IngredientAction>
-                              );
-                            }}
-                          </Draggable>
-                        )
-                      )}
-                      {provided.placeholder}
-                    </Route>
-                  )}
-                </Droppable>
-                <RouteMeta>
-                  <div>
-                    Approve: {appState.routes[routeId]?.approveCount}
-                    <button onClick={() => approveRoute(routeId)}>👍</button>
-                  </div>
-                  <div>
-                    Disapprove: {appState.routes[routeId]?.disapproveCount}
-                    <button onClick={() => disapproveRoute(routeId)}>👎</button>
-                  </div>
-                </RouteMeta>
-              </div>
-            ))}
+            <Routes
+              appState={appState}
+              setAddRoutePopupVisibility={setAddRoutePopupVisibility}
+              addRoutePopupVisibility={addRoutePopupVisibility}
+              changeRouteName={changeRouteName}
+              newRouteName={newRouteName}
+              addRoute={addRoute}
+              calculateTotalRouteDuration={calculateTotalRouteDuration}
+              getCurrencyNameByIngredientId={getCurrencyNameByIngredientId}
+              getPlatformNameByIngredientId={getPlatformNameByIngredientId}
+              getWalletById={getWalletById}
+              getLinkById={getLinkById}
+              approveRoute={approveRoute}
+              disapproveRoute={disapproveRoute}
+            ></Routes>
           </RouteContainer>
         </Container>
       </DragDropContext>
@@ -511,9 +399,9 @@ function App() {
 }
 export default App;
 
-const UnitAdderPopup = styled.div`
-  /* position: absolute;*/
-  z-index: 10;
+const RouteContainer = styled.div`
+  grid-area: routes;
+  position: relative;
 `;
 
 const Container = styled.div`
@@ -534,48 +422,4 @@ const WalletContainer = styled.div`
 `;
 const ActionsContainer = styled.div`
   grid-area: actions;
-`;
-const IngredientWallet = styled(Unit)``;
-const IngredientAction = styled(Unit)`
-  z-index: 2;
-  display: flex;
-  margin-left: 0;
-  margin-right: 0;
-`;
-
-const Arrow = styled.div`
-  align-self: center;
-  transform: scaleY(11);
-  position: relative;
-  top: -15px;
-`;
-
-const RouteContainer = styled.div`
-  grid-area: routes;
-  position: relative;
-`;
-const RouteName = styled.h5`
-  margin: 5px;
-  position: absolute;
-  display: inline-block;
-  top: 1px;
-`;
-const RouteMeta = styled.div`
-  background-color: gray;
-  display: flex;
-  gap: 30px;
-  padding-left: 15px;
-  color: white;
-`;
-
-const Route = styled.div`
-  display: flex;
-  position: relative;
-  min-width: 100px;
-  min-height: 100px;
-  flex-direction: row;
-  flex-wrap: wrap;
-  padding: 20px 10px 10px;
-  margin: 5px 0 0;
-  background-color: lightgreen;
 `;
