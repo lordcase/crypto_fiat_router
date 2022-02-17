@@ -20,7 +20,7 @@ const initialData: AppData = {
   ],
   links: [
     {
-      id: "sYaOHj0UEgXMHTRPZEs2Q",
+      id: "link_sYaOHj0UEgXMHTRPZEs2Q",
       name: "",
       duration: 360,
       costFix: 100,
@@ -36,7 +36,7 @@ const initialData: AppData = {
       mode: "editable",
     },
     {
-      id: "GGUBbciNODYZAvVAv5qzb",
+      id: "link_GGUBbciNODYZAvVAv5qzb",
       name: "",
       duration: 3600,
       costFix: 30,
@@ -52,7 +52,15 @@ const initialData: AppData = {
       mode: "editable",
     },
   ],
-  wallets: [],
+  blocks: {},
+  blockOrder: [],
+  wallets: [
+    {
+      id: "wallet_BINiiiiNODYsieVAv5111",
+      platformId: "BINANCE",
+      currencyId: "BTC",
+    },
+  ],
   walletOrder: [],
   routes: {
     route_GGUBbciNODYsieVAv5qzb: {

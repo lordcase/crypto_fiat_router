@@ -23,6 +23,17 @@ export interface Wallet {
   currencyId: string;
 }
 
+export interface Blocks {
+  [id: string]: Block;
+}
+export interface Block {
+  id: string;
+  name?: string;
+  wallet1Id?: string;
+  wallet2Id?: string;
+  linkId?: string;
+}
+
 export interface Routes {
   [id: string]: Route;
 }
@@ -75,6 +86,8 @@ export interface AppData {
   currencies: Currency[];
   platforms: Platform[];
   actions: Action[];
+  blocks: Blocks;
+  blockOrder: string[];
   links: Link[];
   wallets: Wallet[];
   walletOrder: string[];

@@ -12,6 +12,8 @@ import {
   Currency,
   PotentialLink,
   IngredientType,
+  Block,
+  Action,
 } from "./common/types";
 import Hide from "./common/Hide";
 import { Title } from "./common/styles";
@@ -20,6 +22,7 @@ import CreateLink from "./components/CreateLink";
 import Actions from "./components/Actions";
 import Wallets from "./components/Wallets";
 import Routes from "./components/Routes";
+import BlockCreator from "./components/BlockCreator";
 
 function App() {
   useEffect(() => {
@@ -49,10 +52,14 @@ function App() {
     costFix: "",
     duration: 23,
   });
+  const [blockState, setBlockState] = useState<Block>({
+    id: `block_${nanoid()}`,
+    name: "",
+  });
 
   const addWallet = () => {
     const newWallet: Wallet = {
-      id: nanoid(),
+      id: `wallet_${nanoid()}`,
       platformId: newWalletUnitPlatform,
       currencyId: newWalletUnitCurrency,
     };
@@ -84,7 +91,6 @@ function App() {
   };
 
   const addLink = () => {
-    // console.log(potentialLinkData);
     const { id, duration, durationUnit, name, costFix } = potentialLinkData;
     const newLink: Link = {
       id: id,
@@ -132,6 +138,9 @@ function App() {
 
   const getLinkById = (id: string): Link | undefined => {
     return appState.links?.find((link) => link.id === id);
+  };
+  const getActonById = (id: string): Action | undefined => {
+    return appState.actions?.find((action) => action.id === id);
   };
 
   const selectPlatform = (
@@ -311,7 +320,7 @@ function App() {
             ingredientList[index]?.unitId
           );
           setPotentialLinkData({
-            id: nanoid(),
+            id: `link_${nanoid()}`,
             name: action?.name,
             sourcePlatformId: sourcePlatform.id,
             destPlatformId: destPlatform.id,
@@ -351,6 +360,30 @@ function App() {
           };
         });
       }
+    } else if (destination.droppableId.includes("blockCreatorWallet")) {
+      if (source.droppableId === destination.droppableId) return;
+      const [propertyName1, propertyName2] =
+        destination.droppableId === "blockCreatorWallet1"
+          ? ["wallet1Id", "wallet2Id"]
+          : ["wallet2Id", "wallet1Id"];
+      if (source.droppableId === "wallets") {
+        setBlockState((prev) => ({ ...prev, [propertyName1]: draggableId }));
+      } else if (source.droppableId.includes("blockCreatorWallet")) {
+        setBlockState((prev) => ({
+          ...prev,
+          [propertyName1]: prev[propertyName2 as keyof typeof blockState],
+          [propertyName2]: "",
+        }));
+      }
+    } else if (destination.droppableId.includes("blockCreatorAction")) {
+      console.log();
+
+      if (source.droppableId === destination.droppableId) return;
+      if (source.droppableId === "actions") {
+        setBlockState((prev) => ({ ...prev, linkId: draggableId }));
+      }
+    } else {
+      return;
     }
   };
 
@@ -385,6 +418,25 @@ function App() {
             />
           </ActionsContainer>
 
+          <BlockCreatorContainer>
+            <BlockCreator
+              appState={appState}
+              blockState={blockState}
+              setBlockState={setBlockState}
+              getActonById={getActonById}
+              getWalletById={getWalletById}
+            >
+              <CreateLink
+                potentialLinkData={potentialLinkData}
+                changePotentialLinkData={changePotentialLinkData}
+                setCreateLinkPopupVisibility={setCreateLinkPopupVisibility}
+                addLink={addLink}
+              ></CreateLink>
+            </BlockCreator>
+          </BlockCreatorContainer>
+          <BlocksContainer>
+            <Title>Blocks</Title>
+          </BlocksContainer>
           <FilterContainer>
             <Title>Filters</Title>
           </FilterContainer>
@@ -419,9 +471,9 @@ const RouteContainer = styled.div`
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 200px 30px 1fr;
+  grid-template-rows: 200px 128px 100px 30px 1fr;
   grid-template-columns: 1fr 1fr;
-  grid-template-areas: "wallets actions" "filters filters" "routes routes";
+  grid-template-areas: "wallets actions" "blockCreator blockCreator" "blocks blocks" "filters filters" "routes routes";
   & > * {
     border: 1px solid black;
   }
@@ -429,6 +481,12 @@ const Container = styled.div`
 
 const FilterContainer = styled.div`
   grid-area: filters;
+`;
+const BlocksContainer = styled.div`
+  grid-area: blocks;
+`;
+const BlockCreatorContainer = styled.div`
+  grid-area: blockCreator;
 `;
 const WalletContainer = styled.div`
   grid-area: wallets;
