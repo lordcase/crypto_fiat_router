@@ -27,7 +27,7 @@ import BlockCreator from "./components/BlockCreator";
 function App() {
   useEffect(() => {
     // console.log("rerendeeeer");
-    // console.log(appState);
+    console.log(appState);
   });
 
   const [appState, setAppState] = useState<AppData>(initialData);
@@ -46,12 +46,14 @@ function App() {
     useState<boolean>(true);
   const [addRoutePopupVisibility, setAddRoutePopupVisibility] =
     useState<boolean>(true);
-  const [potentialLinkData, setPotentialLinkData] = useState<PotentialLink>({
-    id: "",
+  const emptyPotentialLink: PotentialLink = {
+    id: nanoid(),
     name: "",
     costFix: "",
     duration: 23,
-  });
+  };
+  const [potentialLinkData, setPotentialLinkData] =
+    useState<PotentialLink>(emptyPotentialLink);
   const [blockState, setBlockState] = useState<Block>({
     id: `block_${nanoid()}`,
     name: "",
@@ -128,6 +130,13 @@ function App() {
     setCreateLinkPopupVisibility(true);
   };
 
+  const addBlock = () => {
+    addLink();
+    setAppState((prev) => ({
+      ...prev,
+      blocks: { ...prev.blocks, [potentialLinkData.id]: blockState },
+    }));
+  };
   const getUnitTypeById = (id: string): "wallet" | "link" => {
     return getWalletById(id) ? "wallet" : "link";
   };
@@ -391,12 +400,24 @@ function App() {
     <div>
       <Hide when={createLinkPopupVisibility}>
         <Overlay>
-          <CreateLink
-            potentialLinkData={potentialLinkData}
-            changePotentialLinkData={changePotentialLinkData}
-            setCreateLinkPopupVisibility={setCreateLinkPopupVisibility}
-            addLink={addLink}
-          />
+          <CreateLinkContainer>
+            <CreateLinkData>
+              <CloseButtonContainer>
+                <button onClick={() => setCreateLinkPopupVisibility(true)}>
+                  X
+                </button>
+              </CloseButtonContainer>
+              <CreateLink
+                potentialLinkData={potentialLinkData}
+                changePotentialLinkData={changePotentialLinkData}
+                setCreateLinkPopupVisibility={setCreateLinkPopupVisibility}
+                addLink={addLink}
+              />
+              <AddContainer style={{ textAlign: "center", paddingTop: "10px" }}>
+                <button onClick={() => addLink()}>Add Link</button>
+              </AddContainer>
+            </CreateLinkData>
+          </CreateLinkContainer>
         </Overlay>
       </Hide>
       <DragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragUpdate}>
@@ -425,13 +446,17 @@ function App() {
               setBlockState={setBlockState}
               getActonById={getActonById}
               getWalletById={getWalletById}
+              addBlock={addBlock}
+              potentialLinkData={potentialLinkData}
             >
-              <CreateLink
-                potentialLinkData={potentialLinkData}
-                changePotentialLinkData={changePotentialLinkData}
-                setCreateLinkPopupVisibility={setCreateLinkPopupVisibility}
-                addLink={addLink}
-              ></CreateLink>
+              <CreateLinkInlineContainer>
+                <CreateLink
+                  potentialLinkData={potentialLinkData}
+                  changePotentialLinkData={changePotentialLinkData}
+                  setCreateLinkPopupVisibility={setCreateLinkPopupVisibility}
+                  addLink={addLink}
+                ></CreateLink>
+              </CreateLinkInlineContainer>
             </BlockCreator>
           </BlockCreatorContainer>
           <BlocksContainer>
@@ -479,6 +504,28 @@ const Container = styled.div`
   }
 `;
 
+const CreateLinkContainer = styled.div`
+  background-color: rgba(90, 90, 90, 0.8);
+  padding: 10px;
+  border-radius: 5px;
+  color: white;
+  position: relative;
+`;
+
+const CreateLinkData = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 5px 10px;
+  padding-top: 10px;
+`;
+
+const CloseButtonContainer = styled.div`
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  display: inline-block;
+`;
+
 const FilterContainer = styled.div`
   grid-area: filters;
 `;
@@ -488,9 +535,26 @@ const BlocksContainer = styled.div`
 const BlockCreatorContainer = styled.div`
   grid-area: blockCreator;
 `;
+const CreateLinkInlineContainer = styled.div`
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  & > div {
+    background-color: gray;
+    padding: 2px;
+  }
+  & > div > input {
+    background-color: #659dbd;
+  }
+`;
+
 const WalletContainer = styled.div`
   grid-area: wallets;
 `;
 const ActionsContainer = styled.div`
   grid-area: actions;
+`;
+const AddContainer = styled.div`
+  template
 `;

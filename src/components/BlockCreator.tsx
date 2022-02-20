@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Droppable,
   Draggable,
@@ -7,8 +7,14 @@ import {
 } from "react-beautiful-dnd";
 import styled from "styled-components";
 import { Title, Tiny, Small, Unit } from "../common/styles";
-import { Action, AppData, Block, Link, Wallet } from "../common/types";
-import CreateLink from "./CreateLink";
+import {
+  Action,
+  AppData,
+  Block,
+  Link,
+  PotentialLink,
+  Wallet,
+} from "../common/types";
 
 const getColor = (snapshot: DroppableStateSnapshot, slot: string) =>
   snapshot.isDraggingOver
@@ -22,13 +28,32 @@ const BlockCreator = ({
   appState,
   blockState,
   setBlockState,
+  potentialLinkData,
   getWalletById,
   getActonById,
+  addBlock,
   children,
 }: Props) => {
   const setBlockName = (event: React.ChangeEvent<HTMLInputElement>): void =>
     setBlockState((prev) => ({ ...prev, name: event.target.value }));
   console.log(blockState);
+
+  const [isCreateButtonDisabled, setIsCreateButtonDisabled] = useState(true);
+  useEffect(() => {
+    if (
+      !potentialLinkData.name ||
+      !blockState.id ||
+      !blockState.name ||
+      !blockState.linkId ||
+      !blockState.wallet1Id ||
+      !blockState.wallet2Id
+    ) {
+      setIsCreateButtonDisabled(true);
+    } else {
+      setIsCreateButtonDisabled(false);
+    }
+  }, [blockState, potentialLinkData]);
+
   return (
     <Container>
       <div>
@@ -39,117 +64,124 @@ const BlockCreator = ({
           <input value={blockState.name} onChange={setBlockName} />
         </div>
       </div>
-      <Creator>
-        <Droppable droppableId="blockCreatorWallet1" direction="horizontal">
-          {(provided, snapshot) => (
-            <DropBox
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              style={{
-                backgroundColor: getColor(snapshot, "wallet"),
-              }}
-            >
-              {!blockState.wallet1Id && <WalletPlaceholder />}
-              {blockState.wallet1Id && (
-                <Draggable draggableId={`bl_${blockState.wallet1Id}`} index={0}>
-                  {(provided) => (
-                    <Unit
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      ref={provided.innerRef}
-                    >
-                      <Tiny>{blockState.wallet1Id}</Tiny>
-                      <br />
-                      {
-                        getWalletById(blockState.wallet1Id as string)?.[
-                          "platformId"
-                        ]
-                      }{" "}
-                      <br />
-                      {
-                        getWalletById(blockState.wallet1Id as string)?.[
-                          "currencyId"
-                        ]
-                      }
-                    </Unit>
-                  )}
-                </Draggable>
-              )}
-              {provided.placeholder}
-            </DropBox>
-          )}
-        </Droppable>
-        <Droppable droppableId="blockCreatorAction" direction="horizontal">
-          {(provided, snapshot) => (
-            <DropBox
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              style={{
-                backgroundColor: getColor(snapshot, "action"),
-              }}
-            >
-              {!blockState.linkId && <ActionPlaceholder />}
-              {blockState.linkId && (
-                <Draggable draggableId={`bl_${blockState.linkId}`} index={0}>
-                  {(provided) => (
-                    <Unit
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      ref={provided.innerRef}
-                    >
-                      <Tiny>{blockState.linkId}</Tiny>
-                      <br />
-                      {getActonById(blockState.linkId as string)?.["name"]}{" "}
-                    </Unit>
-                  )}
-                </Draggable>
-              )}
-              {provided.placeholder}
-            </DropBox>
-          )}
-        </Droppable>
-        <Droppable droppableId="blockCreatorWallet2" direction="horizontal">
-          {(provided, snapshot) => (
-            <DropBox
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              style={{
-                backgroundColor: getColor(snapshot, "wallet"),
-              }}
-            >
-              {!blockState.wallet2Id && <WalletPlaceholder />}
-              {blockState.wallet2Id && (
-                <Draggable draggableId={`bl_${blockState.wallet1Id}`} index={0}>
-                  {(provided) => (
-                    <Unit
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      ref={provided.innerRef}
-                    >
-                      <Tiny>{blockState.wallet2Id}</Tiny>
-                      <br />
-                      {
-                        getWalletById(blockState.wallet2Id as string)?.[
-                          "platformId"
-                        ]
-                      }{" "}
-                      <br />
-                      {
-                        getWalletById(blockState.wallet2Id as string)?.[
-                          "currencyId"
-                        ]
-                      }
-                    </Unit>
-                  )}
-                </Draggable>
-              )}
-              {provided.placeholder}
-            </DropBox>
-          )}
-        </Droppable>
-      </Creator>
+
+      <div>
+        <Creator>
+          <Droppable droppableId="blockCreatorWallet1" direction="horizontal">
+            {(provided, snapshot) => (
+              <DropBox
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                style={{
+                  backgroundColor: getColor(snapshot, "wallet"),
+                }}
+              >
+                {!blockState.wallet1Id && <WalletPlaceholder />}
+                {blockState.wallet1Id && (
+                  <Draggable draggableId={nanoid()} index={0}>
+                    {(provided) => (
+                      <Unit
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        ref={provided.innerRef}
+                      >
+                        <Tiny>{blockState.wallet1Id}</Tiny>
+                        <br />
+                        {
+                          getWalletById(blockState.wallet1Id as string)?.[
+                            "platformId"
+                          ]
+                        }{" "}
+                        <br />
+                        {
+                          getWalletById(blockState.wallet1Id as string)?.[
+                            "currencyId"
+                          ]
+                        }
+                      </Unit>
+                    )}
+                  </Draggable>
+                )}
+                {provided.placeholder}
+              </DropBox>
+            )}
+          </Droppable>
+          <Droppable droppableId="blockCreatorAction" direction="horizontal">
+            {(provided, snapshot) => (
+              <DropBox
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                style={{
+                  backgroundColor: getColor(snapshot, "action"),
+                }}
+              >
+                {!blockState.linkId && <ActionPlaceholder />}
+                {blockState.linkId && (
+                  <Draggable draggableId={nanoid()} index={0}>
+                    {(provided) => (
+                      <Unit
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        ref={provided.innerRef}
+                      >
+                        <Tiny>{blockState.linkId}</Tiny>
+                        <br />
+                        {
+                          getActonById(blockState.linkId as string)?.["name"]
+                        }{" "}
+                      </Unit>
+                    )}
+                  </Draggable>
+                )}
+                {provided.placeholder}
+              </DropBox>
+            )}
+          </Droppable>
+          <Droppable droppableId="blockCreatorWallet2" direction="horizontal">
+            {(provided, snapshot) => (
+              <DropBox
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                style={{
+                  backgroundColor: getColor(snapshot, "wallet"),
+                }}
+              >
+                {!blockState.wallet2Id && <WalletPlaceholder />}
+                {blockState.wallet2Id && (
+                  <Draggable draggableId={nanoid()} index={0}>
+                    {(provided) => (
+                      <Unit
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        ref={provided.innerRef}
+                      >
+                        <Tiny>{blockState.wallet2Id}</Tiny>
+                        <br />
+                        {
+                          getWalletById(blockState.wallet2Id as string)?.[
+                            "platformId"
+                          ]
+                        }{" "}
+                        <br />
+                        {
+                          getWalletById(blockState.wallet2Id as string)?.[
+                            "currencyId"
+                          ]
+                        }
+                      </Unit>
+                    )}
+                  </Draggable>
+                )}
+                {provided.placeholder}
+              </DropBox>
+            )}
+          </Droppable>
+        </Creator>
+      </div>
       {children}
-      <button>Create!</button>
+      <button onClick={addBlock} disabled={isCreateButtonDisabled}>
+        Create!
+      </button>
     </Container>
   );
 };
@@ -160,8 +192,10 @@ type Props = {
   appState: AppData;
   blockState: Block;
   setBlockState: React.Dispatch<React.SetStateAction<Block>>;
+  potentialLinkData: PotentialLink;
   getWalletById(id: string): Wallet | undefined;
   getActonById(id: string): Action | undefined;
+  addBlock(): void;
   children: React.ReactNode;
 };
 
