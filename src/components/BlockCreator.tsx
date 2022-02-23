@@ -6,15 +6,8 @@ import {
   DroppableStateSnapshot,
 } from "react-beautiful-dnd";
 import styled from "styled-components";
-import { Title, Tiny, Small, Unit } from "../common/styles";
-import {
-  Action,
-  AppData,
-  Block,
-  Link,
-  PotentialLink,
-  Wallet,
-} from "../common/types";
+import { Title, Tiny, Unit } from "../common/styles";
+import { Action, AppData, Block, PotentialLink, Wallet } from "../common/types";
 
 const getColor = (snapshot: DroppableStateSnapshot, slot: string) =>
   snapshot.isDraggingOver
@@ -268,11 +261,4 @@ const Creator = styled.div`
     flex: 1;
     min-height: 100px;
   }
-`;
-
-const Arrow = styled.div`
-  align-self: center;
-  transform: scaleY(11);
-  position: relative;
-  top: -15px;
 `;

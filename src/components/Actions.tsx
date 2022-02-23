@@ -8,7 +8,6 @@ const Actions = ({ appState, createLinkWarningVisibility }: Props) => {
   return (
     <>
       <Title>Actions</Title>
-      {/* {JSON.stringify(appState)} */}
       <Droppable droppableId="actions" direction="horizontal">
         {(provided) => (
           <Container ref={provided.innerRef} {...provided.droppableProps}>
@@ -50,6 +49,8 @@ const Container = styled.div`
   display: flex;
   flex-direction: row;
   padding: 10px;
+  flex-wrap: wrap;
+  row-gap: 15px;
 `;
 
 const ActionUnit = styled(Unit)``;

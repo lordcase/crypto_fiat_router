@@ -2,7 +2,7 @@ import React from "react";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import styled from "styled-components";
 import Hide from "../common/Hide";
-import { Tiny, Title, Unit } from "../common/styles";
+import { Title, Unit } from "../common/styles";
 import { AppData } from "../common/types";
 
 const Wallets = ({
@@ -64,8 +64,7 @@ const Wallets = ({
                     {...provided.dragHandleProps}
                     ref={provided.innerRef}
                   >
-                    <Tiny>{walletUnit.id}</Tiny> <br /> {walletUnit.platformId}{" "}
-                    <br />
+                    {walletUnit.platformId} <br />
                     {walletUnit.currencyId}
                   </WalletUnit>
                 )}
@@ -97,9 +96,11 @@ const UnitAdderPopup = styled.div`
   z-index: 10;
 `;
 const WalletsContainer = styled.div`
-  display: flex;
+  display: inline-flex;
   flex-direction: row;
   padding: 10px;
+  flex-wrap: wrap;
+  row-gap: 20px;
 `;
 
 const WalletUnit = styled(Unit)``;

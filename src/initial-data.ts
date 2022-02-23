@@ -15,7 +15,9 @@ const initialData: AppData = {
   actions: [
     { id: "action_SEPA", name: "SEPA transfer" },
     { id: "action_SWIFT", name: "SWIFT transfer" },
-    { id: "action_CRYPTOTX", name: "CRYPTO transfer" },
+    { id: "action_ERC20", name: "ERC20 transfer" },
+    { id: "action_BEP20", name: "BEP20 transfer" },
+    { id: "action_BEP2", name: "BEP2 transfer" },
     { id: "action_EXCHANGE", name: "Exchange" },
   ],
   links: [
@@ -56,9 +58,34 @@ const initialData: AppData = {
   blockOrder: [],
   wallets: [
     {
-      id: "wallet_BINiiiiNODYsieVAv5111",
+      id: "wallet_111iiiiNODYsieVAv5111",
       platformId: "BINANCE",
       currencyId: "BTC",
+    },
+    {
+      id: "wallet_222iiiiNODYsieVAv5222",
+      platformId: "BINANCE",
+      currencyId: "EUR",
+    },
+    {
+      id: "wallet_333iiiiNODYsieVAv5333",
+      platformId: "KRAKEN",
+      currencyId: "BTC",
+    },
+    {
+      id: "wallet_444iiiiNODYsieVAv5444",
+      platformId: "KRAKEN",
+      currencyId: "EUR",
+    },
+    {
+      id: "wallet_555iiiiNODYsieVAv5555",
+      platformId: "REVOLUT",
+      currencyId: "EUR",
+    },
+    {
+      id: "wallet_666iiiiNODYsieVAv5666",
+      platformId: "REVOLUT",
+      currencyId: "HUF",
     },
   ],
   walletOrder: [],

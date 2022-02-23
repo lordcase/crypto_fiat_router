@@ -23,6 +23,7 @@ import Actions from "./components/Actions";
 import Wallets from "./components/Wallets";
 import Routes from "./components/Routes";
 import BlockCreator from "./components/BlockCreator";
+import Blocks from "./components/Blocks";
 
 function App() {
   useEffect(() => {
@@ -52,12 +53,13 @@ function App() {
     costFix: "",
     duration: 23,
   };
-  const [potentialLinkData, setPotentialLinkData] =
-    useState<PotentialLink>(emptyPotentialLink);
-  const [blockState, setBlockState] = useState<Block>({
+  const emptyBlock: Block = {
     id: `block_${nanoid()}`,
     name: "",
-  });
+  };
+  const [potentialLinkData, setPotentialLinkData] =
+    useState<PotentialLink>(emptyPotentialLink);
+  const [blockState, setBlockState] = useState<Block>(emptyBlock);
 
   const addWallet = () => {
     const newWallet: Wallet = {
@@ -136,6 +138,8 @@ function App() {
       ...prev,
       blocks: { ...prev.blocks, [potentialLinkData.id]: blockState },
     }));
+    setPotentialLinkData(emptyPotentialLink);
+    setBlockState(emptyBlock);
   };
   const getUnitTypeById = (id: string): "wallet" | "link" => {
     return getWalletById(id) ? "wallet" : "link";
@@ -460,7 +464,11 @@ function App() {
             </BlockCreator>
           </BlockCreatorContainer>
           <BlocksContainer>
-            <Title>Blocks</Title>
+            <Blocks
+              appState={appState}
+              getWalletById={getWalletById}
+              getLinkById={getLinkById}
+            />
           </BlocksContainer>
           <FilterContainer>
             <Title>Filters</Title>
@@ -496,7 +504,7 @@ const RouteContainer = styled.div`
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 200px 128px 100px 30px 1fr;
+  grid-template-rows: 200px 128px 155px 30px 1fr;
   grid-template-columns: 1fr 1fr;
   grid-template-areas: "wallets actions" "blockCreator blockCreator" "blocks blocks" "filters filters" "routes routes";
   & > * {

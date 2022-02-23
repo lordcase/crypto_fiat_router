@@ -18,4 +18,5 @@ export const Unit = styled.div`
   border: 1px solid gray;
   text-align: center;
   margin: 0 7px;
+  min-width: 110px;
 `;
