@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Small, Tiny, Unit } from "../common/styles";
-import { Wallet, Link, AppData } from "../common/types";
+import { Wallet, AppData } from "../common/types";
 
 const IngredientBody = ({
   appState,

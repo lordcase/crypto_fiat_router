@@ -1,10 +1,8 @@
-import React from "react";
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import styled from "styled-components";
-import { Tiny, Title, Unit } from "../common/styles";
-import { AppData, Link, Wallet } from "../common/types";
+import { Title, Unit } from "../common/styles";
+import { AppData, Wallet } from "../common/types";
 import Block from "./Block";
-import IngredientBody from "./IngredientBody";
 
 const Blocks = ({ appState, getWalletById }: Props) => {
   return (

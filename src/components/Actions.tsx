@@ -4,7 +4,7 @@ import { Droppable, Draggable } from "react-beautiful-dnd";
 import { Title, Unit } from "../common/styles";
 import { AppData } from "../common/types";
 
-const Actions = ({ appState, createLinkWarningVisibility }: Props) => {
+const Actions = ({ appState }: Props) => {
   return (
     <>
       <Title>Actions</Title>
@@ -21,11 +21,6 @@ const Actions = ({ appState, createLinkWarningVisibility }: Props) => {
                     ref={provided.innerRef}
                   >
                     {action.name}
-                    <Indicator
-                      hide={createLinkWarningVisibility || !snapshot.isDragging}
-                    >
-                      !DROP TO LINK!
-                    </Indicator>
                   </ActionUnit>
                 )}
               </Draggable>
@@ -42,7 +37,6 @@ export default Actions;
 
 type Props = {
   appState: AppData;
-  createLinkWarningVisibility: boolean;
 };
 
 const Container = styled.div`
@@ -54,14 +48,3 @@ const Container = styled.div`
 `;
 
 const ActionUnit = styled(Unit)``;
-
-interface IndicatorProps {
-  hide: boolean;
-}
-const Indicator = styled.div<IndicatorProps>`
-  height: 30px;
-  overflow: hidden;
-  text-align: center;
-  color: green;
-  visibility: ${(props) => (props.hide ? "hidden" : "visible")};
-`;

@@ -2,12 +2,7 @@ import React from "react";
 import { Tiny } from "../common/styles";
 import { PotentialLink } from "../common/types";
 
-const CreateLink = ({
-  potentialLinkData,
-  changePotentialLinkData,
-  setCreateLinkPopupVisibility,
-  addLink,
-}: Props) => {
+const CreateLink = ({ potentialLinkData, changePotentialLinkData }: Props) => {
   return (
     <>
       <div>id: </div>
@@ -68,6 +63,4 @@ type Props = {
   changePotentialLinkData(
     event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
   ): void;
-  setCreateLinkPopupVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-  addLink(): void;
 };

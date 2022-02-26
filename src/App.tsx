@@ -11,13 +11,10 @@ import {
   Platform,
   Currency,
   PotentialLink,
-  IngredientType,
   Block,
   Action,
 } from "./common/types";
-import Hide from "./common/Hide";
 import { Title } from "./common/styles";
-import Overlay from "./common/Overlay";
 import CreateLink from "./components/CreateLink";
 import Actions from "./components/Actions";
 import Wallets from "./components/Wallets";
@@ -40,10 +37,6 @@ function App() {
   );
   const [newRouteName, setNewRouteName] = useState<string>("");
   const [addWalletUnitPopupVisibility, setAddWalletUnitPopupVisibility] =
-    useState<boolean>(true);
-  const [createLinkWarningVisibility, setCreateLinkWarningVisibility] =
-    useState<boolean>(true);
-  const [createLinkPopupVisibility, setCreateLinkPopupVisibility] =
     useState<boolean>(true);
   const [addRoutePopupVisibility, setAddRoutePopupVisibility] =
     useState<boolean>(true);
@@ -142,9 +135,9 @@ function App() {
     setPotentialLinkData(emptyPotentialLink);
     setBlockState(emptyBlock);
   };
-  const getUnitTypeById = (id: string): "wallet" | "link" => {
-    return getWalletById(id) ? "wallet" : "link";
-  };
+  // const getUnitTypeById = (id: string): "wallet" | "link" => {
+  //   return getWalletById(id) ? "wallet" : "link";
+  // };
 
   const getWalletById = (id: string): Wallet | undefined => {
     return appState.wallets?.find((wallet) => wallet.id === id);
@@ -401,10 +394,7 @@ function App() {
             />
           </WalletContainer>
           <ActionsContainer>
-            <Actions
-              appState={appState}
-              createLinkWarningVisibility={createLinkWarningVisibility}
-            />
+            <Actions appState={appState} />
           </ActionsContainer>
 
           <BlockCreatorContainer>
@@ -421,8 +411,6 @@ function App() {
                 <CreateLink
                   potentialLinkData={potentialLinkData}
                   changePotentialLinkData={changePotentialLinkData}
-                  setCreateLinkPopupVisibility={setCreateLinkPopupVisibility}
-                  addLink={addLink}
                 ></CreateLink>
               </CreateLinkInlineContainer>
             </BlockCreator>
@@ -471,28 +459,6 @@ const Container = styled.div`
   }
 `;
 
-const CreateLinkContainer = styled.div`
-  background-color: rgba(90, 90, 90, 0.8);
-  padding: 10px;
-  border-radius: 5px;
-  color: white;
-  position: relative;
-`;
-
-const CreateLinkData = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 5px 10px;
-  padding-top: 10px;
-`;
-
-const CloseButtonContainer = styled.div`
-  position: absolute;
-  right: 5px;
-  top: 5px;
-  display: inline-block;
-`;
-
 const FilterContainer = styled.div`
   grid-area: filters;
 `;
@@ -521,7 +487,4 @@ const WalletContainer = styled.div`
 `;
 const ActionsContainer = styled.div`
   grid-area: actions;
-`;
-const AddContainer = styled.div`
-  template
 `;
