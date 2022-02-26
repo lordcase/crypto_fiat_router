@@ -3,9 +3,10 @@ import { Droppable, Draggable } from "react-beautiful-dnd";
 import styled from "styled-components";
 import { Tiny, Title, Unit } from "../common/styles";
 import { AppData, Link, Wallet } from "../common/types";
+import Block from "./Block";
 import IngredientBody from "./IngredientBody";
 
-const Blocks = ({ appState, getWalletById, getLinkById }: Props) => {
+const Blocks = ({ appState, getWalletById }: Props) => {
   return (
     <>
       <Title>Blocks</Title>
@@ -15,33 +16,17 @@ const Blocks = ({ appState, getWalletById, getLinkById }: Props) => {
             {Object.entries(appState.blocks).map(([blockId, block], index) => (
               <Draggable draggableId={blockId} key={blockId} index={index}>
                 {(provided) => (
-                  <Block
+                  <BlockContainer
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                     ref={provided.innerRef}
                   >
-                    <Tiny>{block.name}</Tiny>
-                    <Ingredients>
-                      <IngredientBody
-                        type="wallet"
-                        ingredientId={block.wallet1Id as string}
-                        getWalletById={getWalletById}
-                        getLinkById={getLinkById}
-                      ></IngredientBody>
-                      <IngredientBody
-                        type="link"
-                        ingredientId={block.linkId as string}
-                        getWalletById={getWalletById}
-                        getLinkById={getLinkById}
-                      ></IngredientBody>
-                      <IngredientBody
-                        type="wallet"
-                        ingredientId={block.wallet2Id as string}
-                        getWalletById={getWalletById}
-                        getLinkById={getLinkById}
-                      ></IngredientBody>
-                    </Ingredients>
-                  </Block>
+                    <Block
+                      block={block}
+                      appState={appState}
+                      getWalletById={getWalletById}
+                    ></Block>
+                  </BlockContainer>
                 )}
               </Draggable>
             ))}
@@ -58,7 +43,6 @@ export default Blocks;
 type Props = {
   appState: AppData;
   getWalletById(id: string): Wallet | undefined;
-  getLinkById(id: string): Link | undefined;
 };
 
 const Container = styled.div`
@@ -67,11 +51,6 @@ const Container = styled.div`
   padding: 10px;
 `;
 
-const Block = styled(Unit)`
+const BlockContainer = styled(Unit)`
   background: rgba(235, 235, 235, 1);
-`;
-
-const Ingredients = styled.div`
-  display: flex;
-  flex-direction: columns;
 `;

@@ -16,7 +16,6 @@ const getColor = (snapshot: DroppableStateSnapshot, slot: string) =>
       ? "#8D8741"
       : "#C84A3A"
     : "transparent";
-
 const BlockCreator = ({
   appState,
   blockState,
@@ -29,7 +28,7 @@ const BlockCreator = ({
 }: Props) => {
   const setBlockName = (event: React.ChangeEvent<HTMLInputElement>): void =>
     setBlockState((prev) => ({ ...prev, name: event.target.value }));
-  console.log(blockState);
+  console.log(potentialLinkData.durationUnit);
 
   const [isCreateButtonDisabled, setIsCreateButtonDisabled] = useState(true);
   useEffect(() => {

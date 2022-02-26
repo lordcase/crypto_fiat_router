@@ -1,11 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 import { Small, Tiny, Unit } from "../common/styles";
-import { Wallet, Link } from "../common/types";
+import { Wallet, Link, AppData } from "../common/types";
 
 const IngredientBody = ({
+  appState,
   getWalletById,
-  getLinkById,
   ingredientId,
   type,
 }: Props) => {
@@ -22,15 +22,15 @@ const IngredientBody = ({
       <InnerContainer>
         <Tiny>{ingredientId}</Tiny>
         <br />
-        <div>{getLinkById(ingredientId)?.["name"]}</div>
+        <div>{appState.links[ingredientId]?.["name"]}</div>
         <Small>
           <div>
             Duration:
-            {getLinkById(ingredientId)?.["duration"]}
+            {appState.links[ingredientId]?.["duration"]}
           </div>
           <div>
             Cost:
-            {getLinkById(ingredientId)?.["costFix"]}
+            {appState.links[ingredientId]?.["costFix"]}
           </div>
         </Small>
       </InnerContainer>
@@ -45,7 +45,7 @@ type Props = {
   ingredientId: string;
   type: string;
   getWalletById(id: string): Wallet | undefined;
-  getLinkById(id: string): Link | undefined;
+  appState: AppData;
 };
 
 const WalletContainer = styled(Unit)``;

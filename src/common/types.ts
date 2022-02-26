@@ -41,7 +41,7 @@ export interface Routes {
 export interface Route {
   id: string;
   name: string;
-  ingredientList: Ingredient[];
+  blockList: string[];
   approveCount?: number;
   lastApproveTime?: number;
   disapproveCount?: number;
@@ -58,6 +58,10 @@ export interface Ingredient {
 
 export type LinkStatus = "active" | "inactive";
 export type LinkMode = "readonly" | "editable";
+
+export interface Links {
+  [id: string]: Link;
+}
 
 export interface Link {
   id: string;
@@ -88,7 +92,7 @@ export interface AppData {
   actions: Action[];
   blocks: Blocks;
   blockOrder: string[];
-  links: Link[];
+  links: Links;
   wallets: Wallet[];
   walletOrder: string[];
   routes: Routes;
