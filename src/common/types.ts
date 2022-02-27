@@ -48,6 +48,12 @@ export interface Route {
   lastDisapproveTime?: number;
 }
 
+export type RouteBuilderState = {
+  currentRouteId?: string | undefined;
+  routeBlockIds: string[];
+  blockDict: { [id: string]: string };
+};
+
 export type IngredientType = "wallet" | "action";
 
 export interface Ingredient {

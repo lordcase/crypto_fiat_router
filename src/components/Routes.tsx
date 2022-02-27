@@ -12,7 +12,6 @@ const Routes = ({
   addRoutePopupVisibility,
   changeRouteName,
   newRouteName,
-  addRoute,
   calculateTotalRouteDuration,
   getCurrencyNameByIngredientId,
   getPlatformNameByIngredientId,
@@ -127,7 +126,6 @@ type Props = {
   addRoutePopupVisibility: boolean;
   changeRouteName(event: React.ChangeEvent<HTMLInputElement>): void;
   newRouteName: string;
-  addRoute(): void;
   calculateTotalRouteDuration(routeId: string): number;
   getCurrencyNameByIngredientId(id: string | undefined): string;
   getPlatformNameByIngredientId(id: string | undefined): string;

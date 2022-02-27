@@ -13,6 +13,7 @@ import {
   PotentialLink,
   Block,
   Action,
+  RouteBuilderState,
 } from "./common/types";
 import { Title } from "./common/styles";
 import CreateLink from "./components/CreateLink";
@@ -21,6 +22,7 @@ import Wallets from "./components/Wallets";
 import Routes from "./components/Routes";
 import BlockCreator from "./components/BlockCreator";
 import Blocks from "./components/Blocks";
+import RouteBuilder from "./components/RouteBuilder";
 
 function App() {
   useEffect(() => {
@@ -51,9 +53,16 @@ function App() {
     id: `block_${nanoid()}`,
     name: "",
   };
+  const defaultRouteBuilderState: RouteBuilderState = {
+    routeBlockIds: [],
+    blockDict: {},
+  };
   const [potentialLinkData, setPotentialLinkData] =
     useState<PotentialLink>(emptyPotentialLink);
   const [blockState, setBlockState] = useState<Block>(emptyBlock);
+  const [routeBuilderState, setRouteBuilderState] = useState<RouteBuilderState>(
+    defaultRouteBuilderState
+  );
 
   const addWallet = () => {
     const newWallet: Wallet = {
@@ -67,7 +76,7 @@ function App() {
     }));
   };
 
-  const addRoute = () => {
+  const saveRoute = () => {
     const newId = `route_${nanoid()}`;
     setAppState((prev) => ({
       ...prev,
@@ -248,7 +257,16 @@ function App() {
     }, 0);
     return duration;
   };
+  const smartSplice = (
+    array: (string | number | {})[],
+    insertable: {} | string | number,
+    index: number
+  ): (string | number | {})[] => {
+    console.log(array, insertable, index);
+    console.log([...array.slice(0, index), insertable, ...array.slice(index)]);
 
+    return [...array.slice(0, index), insertable, ...array.slice(index)];
+  };
   // const onDragUpdate = (data: any) => {
   //   // console.log(data);
   //   const ingredientList =
@@ -267,92 +285,118 @@ function App() {
   // };
 
   const onDragEnd = (data: any) => {
-    console.log("woot", data);
     const { source, destination, reason, draggableId } = data;
     if (!destination) return;
     if (reason !== "DROP") return;
     const destId = destination.droppableId;
-    if (destination.droppableId.includes("route")) {
-      const currentRoute = appState.routes[destId];
-      if (source.droppableId === "blocks") {
-        setAppState((prev) => ({
-          ...prev,
-          routes: {
-            ...prev.routes,
-            [destId]: {
-              ...prev.routes[destId],
-              blockList: [
-                ...currentRoute.blockList?.slice(0, destination.index),
-                draggableId,
-                ...currentRoute.blockList?.slice(destination.index),
-              ],
-            },
-          },
-        }));
-        // } else if (source.droppableId === "actions") {
-        //   const { index } = destination;
-        //   const action = appState.actions.find(
-        //     (action) => action.id === draggableId
-        //   );
-        //   const ingredientList =
-        //     appState.routes[destination.droppableId].ingredientList;
-        //   if (
-        //     ingredientList[index - 1]?.type === "wallet" &&
-        //     ingredientList[index]?.type === "wallet"
-        //   ) {
-        //     const sourcePlatform = getPlatformByIngredientId(
-        //       ingredientList[index - 1]?.unitId
-        //     );
-        //     const destPlatform = getPlatformByIngredientId(
-        //       ingredientList[index]?.unitId
-        //     );
-        //     const sourceCurrency = getCurrencyByIngredientId(
-        //       ingredientList[index - 1]?.unitId
-        //     );
-        //     const destCurrency = getCurrencyByIngredientId(
-        //       ingredientList[index]?.unitId
-        //     );
-        //     setPotentialLinkData({
-        //       id: `link_${nanoid()}`,
-        //       name: action?.name,
-        //       sourcePlatformId: sourcePlatform.id,
-        //       destPlatformId: destPlatform.id,
-        //       sourceCurrencyId: sourceCurrency.id,
-        //       destCurrencyId: destCurrency.id,
-        //       actionId: draggableId,
-        //       routeId: destId,
-        //       index: index,
-        //       duration: 0,
-        //       costFix: "",
-        //     });
-        //     setCreateLinkPopupVisibility(false);
-        //   }
-        // } else if (source.droppableId === destination.droppableId) {
-        //   setAppState((prev) => {
-        //     const step1 = [
-        //       ...currentRoute.ingredientList.slice(0, source.index),
-        //       ...currentRoute.ingredientList.slice(source.index + 1),
-        //     ];
-        //     const step2 = [
-        //       ...step1.slice(0, destination.index),
-        //       {
-        //         id: draggableId,
-        //         unitId: prev.routes[destId].ingredientList.find(
-        //           (ingredient) => ingredient.id === draggableId
-        //         )?.unitId,
-        //         type: getUnitTypeById(draggableId),
-        //       },
-        //       ...step1.slice(destination.index),
-        //     ];
-        //     return {
-        //       ...prev,
-        //       routes: {
-        //         ...prev.routes,
-        //         [destId]: { ...prev.routes[destId], ingredientList: step2 },
-        //       },
-        //     };
-        //   });
-      }
+    // if (destination.droppableId.includes("route_")) {
+    //   return;
+    //   const currentRoute = appState.routes[destId];
+    //   if (source.droppableId === "blocks") {
+    //     setAppState((prev) => ({
+    //       ...prev,
+    //       routes: {
+    //         ...prev.routes,
+    //         [destId]: {
+    //           ...prev.routes[destId],
+    //           blockList: [
+    //             ...currentRoute.blockList?.slice(0, destination.index),
+    //             draggableId,
+    //             ...currentRoute.blockList?.slice(destination.index),
+    //           ],
+    //         },
+    //       },
+    //     }));
+    // } else if (source.droppableId === "actions") {
+    //   const { index } = destination;
+    //   const action = appState.actions.find(
+    //     (action) => action.id === draggableId
+    //   );
+    //   const ingredientList =
+    //     appState.routes[destination.droppableId].ingredientList;
+    //   if (
+    //     ingredientList[index - 1]?.type === "wallet" &&
+    //     ingredientList[index]?.type === "wallet"
+    //   ) {
+    //     const sourcePlatform = getPlatformByIngredientId(
+    //       ingredientList[index - 1]?.unitId
+    //     );
+    //     const destPlatform = getPlatformByIngredientId(
+    //       ingredientList[index]?.unitId
+    //     );
+    //     const sourceCurrency = getCurrencyByIngredientId(
+    //       ingredientList[index - 1]?.unitId
+    //     );
+    //     const destCurrency = getCurrencyByIngredientId(
+    //       ingredientList[index]?.unitId
+    //     );
+    //     setPotentialLinkData({
+    //       id: `link_${nanoid()}`,
+    //       name: action?.name,
+    //       sourcePlatformId: sourcePlatform.id,
+    //       destPlatformId: destPlatform.id,
+    //       sourceCurrencyId: sourceCurrency.id,
+    //       destCurrencyId: destCurrency.id,
+    //       actionId: draggableId,
+    //       routeId: destId,
+    //       index: index,
+    //       duration: 0,
+    //       costFix: "",
+    //     });
+    //     setCreateLinkPopupVisibility(false);
+    //   }
+    // } else if (source.droppableId === destination.droppableId) {
+    //   setAppState((prev) => {
+    //     const step1 = [
+    //       ...currentRoute.ingredientList.slice(0, source.index),
+    //       ...currentRoute.ingredientList.slice(source.index + 1),
+    //     ];
+    //     const step2 = [
+    //       ...step1.slice(0, destination.index),
+    //       {
+    //         id: draggableId,
+    //         unitId: prev.routes[destId].ingredientList.find(
+    //           (ingredient) => ingredient.id === draggableId
+    //         )?.unitId,
+    //         type: getUnitTypeById(draggableId),
+    //       },
+    //       ...step1.slice(destination.index),
+    //     ];
+    //     return {
+    //       ...prev,
+    //       routes: {
+    //         ...prev.routes,
+    //         [destId]: { ...prev.routes[destId], ingredientList: step2 },
+    //       },
+    //     };
+    //   });
+    // }
+    if (destination.droppableId.includes("routeBuilder")) {
+      if (source.droppableId !== "blocks") return;
+      const newRouteBlickId = nanoid();
+      const newBlockIds = smartSplice(
+        routeBuilderState.routeBlockIds,
+        newRouteBlickId,
+        destination.index
+      );
+      console.log(routeBuilderState);
+      console.log({
+        ...routeBuilderState,
+        routeBlockIds: newBlockIds,
+        blockDict: {
+          ...routeBuilderState.blockDict,
+          [newRouteBlickId]: draggableId,
+        },
+      });
+
+      setRouteBuilderState(
+        (prev) =>
+          ({
+            ...prev,
+            routeBlockIds: newBlockIds,
+            blockDict: { ...prev.blockDict, [newRouteBlickId]: draggableId },
+          } as RouteBuilderState)
+      );
     } else if (destination.droppableId.includes("blockCreatorWallet")) {
       if (source.droppableId === destination.droppableId) return;
       const [propertyName1, propertyName2] =
@@ -418,6 +462,14 @@ function App() {
           <BlocksContainer>
             <Blocks appState={appState} getWalletById={getWalletById} />
           </BlocksContainer>
+          <RouteBuilderContainer>
+            <RouteBuilder
+              appState={appState}
+              getWalletById={getWalletById}
+              routeBuilderState={routeBuilderState}
+              setRouteBuilderState={setRouteBuilderState}
+            />
+          </RouteBuilderContainer>
           <FilterContainer>
             <Title>Filters</Title>
           </FilterContainer>
@@ -428,7 +480,6 @@ function App() {
               addRoutePopupVisibility={addRoutePopupVisibility}
               changeRouteName={changeRouteName}
               newRouteName={newRouteName}
-              addRoute={addRoute}
               calculateTotalRouteDuration={calculateTotalRouteDuration}
               getCurrencyNameByIngredientId={getCurrencyNameByIngredientId}
               getPlatformNameByIngredientId={getPlatformNameByIngredientId}
@@ -451,9 +502,9 @@ const RouteContainer = styled.div`
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 200px 158px 155px 30px 1fr;
+  grid-template-rows: 200px 158px 115px 115px 30px 1fr;
   grid-template-columns: 1fr 1fr;
-  grid-template-areas: "wallets actions" "blockCreator blockCreator" "blocks blocks" "filters filters" "routes routes";
+  grid-template-areas: "wallets actions" "blockCreator blockCreator" "blocks blocks" "routeBuilder routeBuilder" "filters filters" "routes routes";
   & > * {
     border: 1px solid black;
   }
@@ -467,6 +518,9 @@ const BlocksContainer = styled.div`
 `;
 const BlockCreatorContainer = styled.div`
   grid-area: blockCreator;
+`;
+const RouteBuilderContainer = styled.div`
+  grid-area: routeBuilder;
 `;
 const CreateLinkInlineContainer = styled.div`
   display: grid;
