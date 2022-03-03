@@ -45,7 +45,7 @@ const Wallets = ({
       <Droppable
         droppableId="wallets"
         direction="horizontal"
-        // isDropDisabled={true}
+        isDropDisabled={true}
       >
         {(provided) => (
           <WalletsContainer
@@ -58,15 +58,37 @@ const Wallets = ({
                 index={index}
                 key={walletUnit.id}
               >
-                {(provided) => (
-                  <WalletUnit
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    ref={provided.innerRef}
-                  >
-                    {walletUnit.platformId} <br />
-                    {walletUnit.currencyId}
-                  </WalletUnit>
+                {(provided, snapshot) => (
+                  <DragContainer>
+                    <WalletUnit
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      ref={provided.innerRef}
+                      style={{
+                        ...provided.draggableProps.style,
+                        paddingBottom: "8px",
+                        transform: snapshot.isDragging
+                          ? provided.draggableProps.style?.transform
+                          : "translate(0px, 0px)",
+                      }}
+                    >
+                      {walletUnit.platformId} <br />
+                      {walletUnit.currencyId}
+                    </WalletUnit>
+                    {snapshot.isDragging && (
+                      <WalletUnit
+                        style={{
+                          ...provided.draggableProps.style,
+                          transform: "none !important",
+                          paddingBottom: "8px",
+                          backgroundColor: "white",
+                        }}
+                      >
+                        {walletUnit.platformId} <br />
+                        {walletUnit.currencyId}
+                      </WalletUnit>
+                    )}
+                  </DragContainer>
                 )}
               </Draggable>
             ))}
@@ -101,6 +123,9 @@ const WalletsContainer = styled.div`
   padding: 10px;
   flex-wrap: wrap;
   row-gap: 20px;
+`;
+const DragContainer = styled.div`
+  min-width: 140px;
 `;
 
 const WalletUnit = styled(Unit)``;

@@ -502,7 +502,7 @@ const RouteContainer = styled.div`
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 200px 158px 115px 115px 30px 1fr;
+  grid-template-rows: 200px 158px 155px 175px 30px 1fr;
   grid-template-columns: 1fr 1fr;
   grid-template-areas: "wallets actions" "blockCreator blockCreator" "blocks blocks" "routeBuilder routeBuilder" "filters filters" "routes routes";
   & > * {

@@ -8,16 +8,17 @@ const IngredientBody = ({
   getWalletById,
   ingredientId,
   type,
+  className,
 }: Props) => {
   return type === "wallet" ? (
-    <WalletContainer>
+    <WalletContainer className={`${className}`}>
       <Tiny>{ingredientId}</Tiny>
       <br />
       {getWalletById(ingredientId)?.["platformId"]} <br />
       {getWalletById(ingredientId)?.["currencyId"]}
     </WalletContainer>
   ) : (
-    <LinkContainer>
+    <LinkContainer className={`${className}`}>
       <LeftArrow>&gt;</LeftArrow>
       <InnerContainer>
         <Tiny>{ingredientId}</Tiny>
@@ -46,9 +47,17 @@ type Props = {
   type: string;
   getWalletById(id: string): Wallet | undefined;
   appState: AppData;
+  className?: string;
 };
 
-const WalletContainer = styled(Unit)``;
+const WalletContainer = styled(Unit)`
+  &.green {
+    background-color: lightgreen;
+  }
+  &.red {
+    background-color: lightcoral;
+  }
+`;
 const LinkContainer = styled(Unit)`
   display: flex;
 `;
