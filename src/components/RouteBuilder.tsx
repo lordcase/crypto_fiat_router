@@ -1,8 +1,6 @@
-import { nanoid } from "nanoid";
 import React, { useEffect, useState } from "react";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import styled from "styled-components";
-import { setOriginalNode } from "typescript";
 import { Title } from "../common/styles";
 import { AppData, RouteBuilderState, Wallet } from "../common/types";
 import Block from "./Block";
@@ -14,42 +12,46 @@ const RouteBuilder = ({
   getWalletById,
 }: Props) => {
   console.log("start");
-  const compareWallets = (id1: string, id2: string) => {
-    return id1 === id2 ? "green" : "red";
+  const compareWallets = (id1: string, id2: string): number => {
+    return id1 === id2 ? 1 : 0;
   };
   const [compatibilityMatrix, setCompatibilityMatrix] = useState<
-    Array<Array<string>>
+    Array<Array<number>>
   >([]);
+  const [routeIsValid, setRouteIsValid] = useState(true);
   useEffect(() => {
+    setRouteIsValid(true);
     const getBlock = (id: string) =>
       appState.blocks[routeBuilderState.blockDict[id]];
     setCompatibilityMatrix(
       routeBuilderState.routeBlockIds.reduce(
-        (acc: string[][], curr, index, array) => {
+        (acc: number[][], curr, index, array) => {
           if (index === 0) {
             if (!array[index + 1]) {
-              return [["green", "green"]];
+              return [[1, 1]];
             } else {
               const wallet2Id = getBlock(curr).wallet2Id as string;
               const wallet1Id = getBlock(array[index + 1]).wallet1Id as string;
-              return [["green", compareWallets(wallet2Id, wallet1Id)]];
+              const result = compareWallets(wallet2Id, wallet1Id);
+              if (result !== 1) setRouteIsValid(false);
+              return [[1, result]];
             }
           } else if (index === array.length - 1) {
             const wallet1Id = getBlock(array[index - 1]).wallet2Id as string;
             const wallet2Id = getBlock(curr).wallet1Id as string;
-            return [...acc, [compareWallets(wallet2Id, wallet1Id), "green"]];
+            const result = compareWallets(wallet2Id, wallet1Id);
+            if (result !== 1) setRouteIsValid(false);
+            return [...acc, [result, 1]];
           } else {
             const wallet1Id = getBlock(array[index - 1]).wallet2Id as string;
             const wallet2Id = getBlock(curr).wallet1Id as string;
             const wallet3Id = getBlock(curr).wallet2Id as string;
             const wallet4Id = getBlock(array[index + 1]).wallet1Id as string;
-            return [
-              ...acc,
-              [
-                compareWallets(wallet1Id, wallet2Id),
-                compareWallets(wallet3Id, wallet4Id),
-              ],
-            ];
+            const result1 = compareWallets(wallet2Id, wallet1Id);
+            const result2 = compareWallets(wallet3Id, wallet4Id);
+            if (result1 !== 1 || result2 !== 1) setRouteIsValid(false);
+
+            return [...acc, [result1, result2]];
           }
         },
         []
@@ -101,7 +103,7 @@ const RouteBuilder = ({
           </Container>
         )}
       </Droppable>
-      <button>SAVE ROUTE</button>
+      <button disabled={!routeIsValid}>SAVE ROUTE</button>
     </>
   );
 };

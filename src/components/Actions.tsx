@@ -1,12 +1,9 @@
-import React, { useRef } from "react";
 import styled from "styled-components";
 import { Droppable, Draggable } from "react-beautiful-dnd";
 import { Title, Unit } from "../common/styles";
 import { AppData } from "../common/types";
 
 const Actions = ({ appState }: Props) => {
-  const reff = useRef(null);
-
   return (
     <>
       <Title>Actions</Title>

@@ -5,6 +5,7 @@ import { AppData, Wallet, Block as BlockData } from "../common/types";
 import IngredientBody from "./IngredientBody";
 
 const Block = ({ appState, getWalletById, block, classes }: Props) => {
+  const classDict: { [id: number]: string } = { 0: "red", 1: "green" };
   return (
     <div>
       {" "}
@@ -15,7 +16,7 @@ const Block = ({ appState, getWalletById, block, classes }: Props) => {
           type="wallet"
           ingredientId={block.wallet1Id as string}
           getWalletById={getWalletById}
-          className={classes ? classes[0] : ""}
+          className={classes ? classDict[classes[0]] : ""}
         ></IngredientBody>
         <IngredientBody
           appState={appState}
@@ -29,7 +30,7 @@ const Block = ({ appState, getWalletById, block, classes }: Props) => {
           type="wallet"
           ingredientId={block.wallet2Id as string}
           getWalletById={getWalletById}
-          className={classes ? classes[1] : ""}
+          className={classes ? classDict[classes[1]] : ""}
         ></IngredientBody>
       </Ingredients>
     </div>
@@ -42,7 +43,7 @@ type Props = {
   appState: AppData;
   block: BlockData;
   getWalletById(id: string): Wallet | undefined;
-  classes?: string[];
+  classes?: number[];
 };
 
 const Ingredients = styled.div`
