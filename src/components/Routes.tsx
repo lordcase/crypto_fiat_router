@@ -1,13 +1,8 @@
 import React from "react";
 import styled from "styled-components";
+import { displayDuration } from "../common/helpers";
 import { Title, Small, Unit } from "../common/styles";
-import {
-  Action,
-  AppData,
-  DurationUnits,
-  Wallet,
-  Block as BlockType,
-} from "../common/types";
+import { Action, AppData, Wallet } from "../common/types";
 
 const Routes = ({
   appState,
@@ -18,11 +13,6 @@ const Routes = ({
   editRoute,
   disapproveRoute,
 }: Props) => {
-  const displayDuration = (block: BlockType) => {
-    return ` ${Math.round(
-      (block.duration as number) / ((block.durationUnit as number) || 1)
-    )} ${DurationUnits[block.durationUnit as 1 | 60 | 3600 | 86400] as any}`;
-  };
   return (
     <>
       <Title>Routes</Title>
@@ -103,7 +93,7 @@ export default Routes;
 
 type Props = {
   appState: AppData;
-  calculateTotalRouteDuration(routeId: string): number;
+  calculateTotalRouteDuration(routeId: string): string;
   getWalletById(id: string): Wallet | undefined;
   getActonById(id: string): Action | undefined;
   approveRoute(routeId: string): void;

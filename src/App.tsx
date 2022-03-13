@@ -195,11 +195,26 @@ function App() {
     const duration = appState.routes[routeId].blockList.reduce(
       (acc: number, currentBlockid: string) => {
         const currentBlock = appState.blocks[currentBlockid];
-        return currentBlock.duration ? acc + currentBlock.duration : 0;
+        return currentBlock.duration && currentBlock.durationUnit
+          ? acc + currentBlock.duration * currentBlock.durationUnit
+          : 0;
       },
       0
     );
-    return duration;
+    if (duration / 86400 >= 1) {
+      return `${Math.floor(duration / 86400)} - ${
+        Math.floor(duration / 86400) + 1
+      } days`;
+    }
+    if (duration / 3600 >= 1) {
+      return `${Math.floor(duration / 3600)} - ${
+        Math.floor(duration / 3600) + 1
+      } hours`;
+    }
+    if (duration / 60 >= 1) {
+      return `~${Math.floor(duration / 6)} minutes`;
+    }
+    return `near instant`;
   };
   // const onDragUpdate = (data: any) => {
   //   const ingredientList =

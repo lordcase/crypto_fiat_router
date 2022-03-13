@@ -1,7 +1,12 @@
 import React from "react";
 import styled from "styled-components";
 import { Small, Tiny, Unit } from "../common/styles";
-import { Wallet, AppData } from "../common/types";
+import {
+  Wallet,
+  AppData,
+  DurationUnits,
+  DurationValues,
+} from "../common/types";
 
 const IngredientBody = ({
   appState,
@@ -29,10 +34,11 @@ const IngredientBody = ({
           <div>
             Duration:
             {appState.blocks[blockId]?.["duration"]}
-          </div>
-          <div>
-            Cost:
-            {appState.blocks[blockId]?.["costFix"]}
+            {
+              DurationUnits[
+                appState.blocks[blockId]["durationUnit"] as DurationValues
+              ]
+            }
           </div>
         </Small>
       </InnerContainer>

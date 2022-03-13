@@ -240,9 +240,23 @@ const BlockCreator = ({
           </select>
         </div>
       </CreateLinkInlineContainer>
-      <button onClick={addBlock} disabled={isCreateButtonDisabled}>
-        Create!
-      </button>
+      <ButtonsContainer>
+        <button onClick={addBlock} disabled={isCreateButtonDisabled}>
+          Save
+        </button>
+        <button
+          onClick={() =>
+            setBlockState({
+              id: `block_${nanoid()}`,
+              name: "",
+              duration: 3,
+              costFix: 0,
+            })
+          }
+        >
+          Reset
+        </button>
+      </ButtonsContainer>
     </Container>
   );
 };
@@ -259,6 +273,11 @@ type Props = {
   addBlock(): void;
 };
 
+const ButtonsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
 const Container = styled.div`
   display: flex;
   gap: 25px;

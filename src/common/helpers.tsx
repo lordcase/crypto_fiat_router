@@ -1,3 +1,5 @@
+import { Block, DurationUnits, DurationValues } from "./types";
+
 export const isNumeric = (n: any) => {
   return !isNaN(parseFloat(n)) && isFinite(n);
 };
@@ -16,4 +18,11 @@ export const sanitizeNumericInput = (input: any): number | "" => {
   if (input === "") return "";
   if (!isNumeric(input)) return "";
   return parseInt(input);
+};
+
+export const displayDuration = (block: Block) => {
+  return ` 
+    ${block.duration as number} ${
+    DurationUnits[block.durationUnit as DurationValues] as any
+  }`;
 };

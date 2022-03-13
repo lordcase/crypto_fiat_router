@@ -113,6 +113,8 @@ export interface AppData {
   routeOrder: string[];
 }
 
+export type DurationValues = 1 | 60 | 3600 | 86400;
+
 export const DurationUnits = {
   1: "seconds",
   60: "minutes",

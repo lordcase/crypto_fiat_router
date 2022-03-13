@@ -111,29 +111,35 @@ const RouteBuilder = ({
       <Droppable droppableId="routeBuilder" direction="horizontal">
         {(provided) => (
           <Container ref={provided.innerRef}>
-            {routeBuilderState.routeBlockIds.map((id, index) => (
-              <Draggable draggableId={id} index={index} key={id}>
-                {(provided) => (
-                  <Bla
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    ref={provided.innerRef}
-                  >
-                    <TopRightButtonContainer>
-                      <button onClick={() => delBlock(id)}>x</button>
-                    </TopRightButtonContainer>
-                    <Block
-                      appState={appState}
-                      block={
-                        appState.blocks[routeBuilderState.blockDict[id] as any]
-                      }
-                      getWalletById={getWalletById}
-                      classes={compatibilityMatrix[index]}
-                    ></Block>
-                  </Bla>
-                )}
-              </Draggable>
-            ))}
+            {routeBuilderState.routeBlockIds.length < 1 ? (
+              <Placeholder>Drag Blocks here</Placeholder>
+            ) : (
+              routeBuilderState.routeBlockIds.map((id, index) => (
+                <Draggable draggableId={id} index={index} key={id}>
+                  {(provided) => (
+                    <Bla
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      ref={provided.innerRef}
+                    >
+                      <TopRightButtonContainer>
+                        <button onClick={() => delBlock(id)}>x</button>
+                      </TopRightButtonContainer>
+                      <Block
+                        appState={appState}
+                        block={
+                          appState.blocks[
+                            routeBuilderState.blockDict[id] as any
+                          ]
+                        }
+                        getWalletById={getWalletById}
+                        classes={compatibilityMatrix[index]}
+                      ></Block>
+                    </Bla>
+                  )}
+                </Draggable>
+              ))
+            )}
             {provided.placeholder}
           </Container>
         )}
@@ -162,6 +168,8 @@ const Bla = styled.div`
 
 const ControlsContainer = styled.div`
   padding-top: 8px;
+  display: flex;
+  gap: 8px;
 `;
 const Container = styled.div`
   display: flex;
@@ -172,6 +180,11 @@ const Container = styled.div`
   gap: 5px;
   background: #659dbd;
   min-height: 80px;
+`;
+const Placeholder = styled.div`
+  display: flex;
+  align-items: center;
+  color: #5d5c61;
 `;
 
 type Props = {
