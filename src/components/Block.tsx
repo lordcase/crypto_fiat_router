@@ -14,6 +14,7 @@ const Block = ({ appState, getWalletById, block, classes }: Props) => {
         <IngredientBody
           appState={appState}
           type="wallet"
+          blockId={block.id}
           ingredientId={block.wallet1Id as string}
           getWalletById={getWalletById}
           className={classes ? classDict[classes[0]] : ""}
@@ -21,6 +22,7 @@ const Block = ({ appState, getWalletById, block, classes }: Props) => {
         <IngredientBody
           appState={appState}
           type="link"
+          blockId={block.id}
           ingredientId={block.linkId as string}
           getWalletById={getWalletById}
           className=""
@@ -28,6 +30,7 @@ const Block = ({ appState, getWalletById, block, classes }: Props) => {
         <IngredientBody
           appState={appState}
           type="wallet"
+          blockId={block.id}
           ingredientId={block.wallet2Id as string}
           getWalletById={getWalletById}
           className={classes ? classDict[classes[1]] : ""}

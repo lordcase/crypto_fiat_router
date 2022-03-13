@@ -17,14 +17,6 @@ const CreateLink = ({ potentialLinkData, changePotentialLinkData }: Props) => {
           data-field="name"
         />
       </div>
-      <div>source platform:</div>
-      <div>{potentialLinkData.sourcePlatformId}</div>
-      <div>dest platform:</div>
-      <div>{potentialLinkData.destPlatformId}</div>
-      <div>source currency:</div>
-      <div>{potentialLinkData.sourceCurrencyId}</div>
-      <div>dest currency:</div>
-      <div>{potentialLinkData.destCurrencyId}</div>
       <div>Cost:</div>
       <div>
         <input

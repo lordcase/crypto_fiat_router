@@ -32,6 +32,13 @@ export interface Block {
   wallet1Id?: string;
   wallet2Id?: string;
   linkId?: string;
+  duration?: number | "";
+  durationUnit?: number | "";
+  costFix?: number | "";
+  costCurrencyId?: string;
+  costPercentage?: number;
+  status?: LinkStatus;
+  author?: string;
 }
 
 export interface Routes {
@@ -49,7 +56,8 @@ export interface Route {
 }
 
 export type RouteBuilderState = {
-  currentRouteId?: string | undefined;
+  currentRouteId: string;
+  currentRouteName: string;
   routeBlockIds: string[];
   blockDict: { [id: string]: string };
 };
@@ -104,3 +112,10 @@ export interface AppData {
   routes: Routes;
   routeOrder: string[];
 }
+
+export const DurationUnits = {
+  1: "seconds",
+  60: "minutes",
+  3600: "hours",
+  86400: "days",
+};

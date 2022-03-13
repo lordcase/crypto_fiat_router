@@ -6,6 +6,7 @@ import { Wallet, AppData } from "../common/types";
 const IngredientBody = ({
   appState,
   getWalletById,
+  blockId,
   ingredientId,
   type,
   className,
@@ -27,11 +28,11 @@ const IngredientBody = ({
         <Small>
           <div>
             Duration:
-            {appState.links[ingredientId]?.["duration"]}
+            {appState.blocks[blockId]?.["duration"]}
           </div>
           <div>
             Cost:
-            {appState.links[ingredientId]?.["costFix"]}
+            {appState.blocks[blockId]?.["costFix"]}
           </div>
         </Small>
       </InnerContainer>
@@ -43,6 +44,7 @@ const IngredientBody = ({
 export default IngredientBody;
 
 type Props = {
+  blockId: string;
   ingredientId: string;
   type: string;
   getWalletById(id: string): Wallet | undefined;
