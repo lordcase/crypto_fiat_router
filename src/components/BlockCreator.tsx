@@ -1,13 +1,24 @@
 import { nanoid } from "nanoid";
 import React, { useEffect, useState } from "react";
 import {
+  checkNumericInputValue,
+  sanitizeNumericInput,
+} from "../common/helpers";
+import {
   Droppable,
   Draggable,
   DroppableStateSnapshot,
 } from "react-beautiful-dnd";
 import styled from "styled-components";
 import { Title, Tiny, Unit } from "../common/styles";
-import { Action, AppData, Block, PotentialLink, Wallet } from "../common/types";
+import {
+  Action,
+  AppData,
+  Block,
+  DurationUnits,
+  PotentialLink,
+  Wallet,
+} from "../common/types";
 
 const getColor = (snapshot: DroppableStateSnapshot, slot: string) =>
   snapshot.isDraggingOver
@@ -20,20 +31,41 @@ const BlockCreator = ({
   appState,
   blockState,
   setBlockState,
-  potentialLinkData,
   getWalletById,
   getActonById,
   addBlock,
-  children,
 }: Props) => {
   const setBlockName = (event: React.ChangeEvent<HTMLInputElement>): void =>
     setBlockState((prev) => ({ ...prev, name: event.target.value }));
-  console.log(potentialLinkData.durationUnit);
+  const setBlockDuration = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ): void => {
+    checkNumericInputValue(event.target.value) &&
+      setBlockState((prev) => ({
+        ...prev,
+        duration: sanitizeNumericInput(event.target.value),
+      }));
+  };
+  const setBlockDurationUnit = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ): void => {
+    checkNumericInputValue(event.target.value) &&
+      setBlockState((prev) => ({
+        ...prev,
+        durationUnit: sanitizeNumericInput(event.target.value),
+      }));
+  };
+  const setBlockCost = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    checkNumericInputValue(event.target.value) &&
+      setBlockState((prev) => ({
+        ...prev,
+        costFix: sanitizeNumericInput(event.target.value),
+      }));
+  };
 
   const [isCreateButtonDisabled, setIsCreateButtonDisabled] = useState(true);
   useEffect(() => {
     if (
-      !potentialLinkData.name ||
       !blockState.id ||
       !blockState.name ||
       !blockState.linkId ||
@@ -44,17 +76,12 @@ const BlockCreator = ({
     } else {
       setIsCreateButtonDisabled(false);
     }
-  }, [blockState, potentialLinkData]);
+  }, [blockState]);
 
   return (
     <Container>
       <div>
         <Title>BlockCreator</Title>
-        <div>
-          Name of block:
-          <br />
-          <input value={blockState.name} onChange={setBlockName} />
-        </div>
       </div>
 
       <div>
@@ -170,7 +197,49 @@ const BlockCreator = ({
           </Droppable>
         </Creator>
       </div>
-      {children}
+      <CreateLinkInlineContainer>
+        <div>ID: </div>
+        <div>
+          <Tiny>{blockState.id}</Tiny>
+        </div>
+        <div>Name:</div>
+        <div>
+          <input value={blockState.name} onChange={setBlockName} />
+        </div>
+        <div>Cost:</div>
+        <div>
+          <input
+            value={blockState.costFix}
+            data-field="costFix"
+            onChange={setBlockCost}
+          />
+        </div>
+        <div>duration:</div>
+        <div>
+          <input
+            value={blockState.duration}
+            data-field="duration"
+            onChange={setBlockDuration}
+            size={5}
+          />
+          <select
+            value={blockState.durationUnit}
+            onChange={setBlockDurationUnit}
+            data-field="durationUnit"
+          >
+            {Object.entries(DurationUnits).map(([key, value]) => (
+              <option value={key} key={key}>
+                {value}
+              </option>
+            ))}
+
+            {/* <option value="1">seconds</option>
+            <option value="60">minutes</option>
+            <option value="3600">hours</option>
+            <option value="86400">days</option> */}
+          </select>
+        </div>
+      </CreateLinkInlineContainer>
       <button onClick={addBlock} disabled={isCreateButtonDisabled}>
         Create!
       </button>
@@ -188,7 +257,6 @@ type Props = {
   getWalletById(id: string): Wallet | undefined;
   getActonById(id: string): Action | undefined;
   addBlock(): void;
-  children: React.ReactNode;
 };
 
 const Container = styled.div`
@@ -259,5 +327,18 @@ const Creator = styled.div`
   & > div {
     flex: 1;
     min-height: 100px;
+  }
+`;
+const CreateLinkInlineContainer = styled.div`
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  & > div {
+    background-color: gray;
+    padding: 2px;
+  }
+  & > div > input {
+    background-color: #659dbd;
   }
 `;

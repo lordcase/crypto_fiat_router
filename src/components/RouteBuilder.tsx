@@ -1,7 +1,8 @@
+import { nanoid } from "nanoid";
 import React, { useEffect, useState } from "react";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import styled from "styled-components";
-import { Title } from "../common/styles";
+import { Title, TopRightButtonContainer } from "../common/styles";
 import { AppData, RouteBuilderState, Wallet } from "../common/types";
 import Block from "./Block";
 
@@ -10,10 +11,20 @@ const RouteBuilder = ({
   routeBuilderState,
   setRouteBuilderState,
   getWalletById,
+  saveRoute,
 }: Props) => {
-  console.log("start");
+  console.log("routeBuilderState");
+  console.log(routeBuilderState);
   const compareWallets = (id1: string, id2: string): number => {
     return id1 === id2 ? 1 : 0;
+  };
+  const resetBuilder = () => {
+    setRouteBuilderState({
+      currentRouteId: `route_${nanoid()}`,
+      currentRouteName: "",
+      routeBlockIds: [],
+      blockDict: {},
+    });
   };
   const [compatibilityMatrix, setCompatibilityMatrix] = useState<
     Array<Array<number>>
@@ -59,7 +70,7 @@ const RouteBuilder = ({
     );
   }, [appState, routeBuilderState]);
 
-  const delRoute = (id: string): void => {
+  const delBlock = (id: string): void => {
     setRouteBuilderState((prev) => {
       const newRouteBlockIds = prev.routeBlockIds.filter(
         (blockId) => blockId !== id
@@ -74,7 +85,25 @@ const RouteBuilder = ({
   };
   return (
     <>
-      <Title>RouteBuilder</Title>
+      <Title>
+        RouteBuilder (
+        {appState.routeOrder.includes(routeBuilderState.currentRouteId)
+          ? `existing route: ${
+              appState.routes[routeBuilderState.currentRouteId].name
+            }`
+          : "new route"}
+        ) Name:{" "}
+        <input
+          type="text"
+          value={routeBuilderState.currentRouteName}
+          onChange={(event) =>
+            setRouteBuilderState((prev) => ({
+              ...prev,
+              currentRouteName: (event.target as HTMLInputElement).value,
+            }))
+          }
+        />
+      </Title>
       <Droppable droppableId="routeBuilder" direction="horizontal">
         {(provided) => (
           <Container ref={provided.innerRef}>
@@ -86,7 +115,9 @@ const RouteBuilder = ({
                     {...provided.dragHandleProps}
                     ref={provided.innerRef}
                   >
-                    <DelButton onClick={() => delRoute(id)}>x</DelButton>
+                    <TopRightButtonContainer>
+                      <button onClick={() => delBlock(id)}>x</button>
+                    </TopRightButtonContainer>
                     <Block
                       appState={appState}
                       block={
@@ -103,7 +134,15 @@ const RouteBuilder = ({
           </Container>
         )}
       </Droppable>
-      <button disabled={!routeIsValid}>SAVE ROUTE</button>
+      <ControlsContainer>
+        <button disabled={!routeIsValid} onClick={() => saveRoute("overwrite")}>
+          SAVE ROUTE
+        </button>
+        <button disabled={!routeIsValid} onClick={() => saveRoute("clone")}>
+          SAVE A COPY
+        </button>
+        <button onClick={resetBuilder}>RESET ROUTE</button>
+      </ControlsContainer>
     </>
   );
 };
@@ -114,8 +153,12 @@ const Bla = styled.div`
   border: 1px solid;
   padding: 5px;
   position: relative;
+  background: lightgrey;
 `;
 
+const ControlsContainer = styled.div`
+  padding-top: 8px;
+`;
 const Container = styled.div`
   display: flex;
   flex-direction: row;
@@ -123,16 +166,8 @@ const Container = styled.div`
   flex-wrap: wrap;
   row-gap: 15px;
   gap: 5px;
-`;
-
-const DelButton = styled.button`
-  position: absolute;
-  right: 8px;
-  &:hover {
-    background-color: #f6abb6;
-    cursor: pointer;
-    border: 1px solid;
-  }
+  background: #659dbd;
+  min-height: 80px;
 `;
 
 type Props = {
@@ -140,4 +175,5 @@ type Props = {
   routeBuilderState: RouteBuilderState;
   setRouteBuilderState: React.Dispatch<React.SetStateAction<RouteBuilderState>>;
   getWalletById(id: string): Wallet | undefined;
+  saveRoute(mode: string): void;
 };

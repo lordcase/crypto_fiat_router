@@ -20,3 +20,16 @@ export const Unit = styled.div`
   margin: 0 7px;
   min-width: 110px;
 `;
+
+export const TopRightButtonContainer = styled.div`
+  position: absolute;
+  right: 8px;
+  display: flex;
+  gap: 3px;
+  & > button:hover {
+    background-color: #f6abb6;
+    cursor: pointer;
+    border: 1px solid;
+    margin: 1px;
+  }
+`;

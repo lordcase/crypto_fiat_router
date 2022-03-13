@@ -4,6 +4,7 @@ import styled from "styled-components";
 import initialData from "./initial-data";
 import { DragDropContext } from "react-beautiful-dnd";
 import { nanoid } from "nanoid";
+import { sanitizeNumericInput, smartSplice } from "./common/helpers";
 import {
   AppData,
   Link,
@@ -16,7 +17,6 @@ import {
   RouteBuilderState,
 } from "./common/types";
 import { Title } from "./common/styles";
-import CreateLink from "./components/CreateLink";
 import Actions from "./components/Actions";
 import Wallets from "./components/Wallets";
 import Routes from "./components/Routes";
@@ -26,7 +26,7 @@ import RouteBuilder from "./components/RouteBuilder";
 
 function App() {
   useEffect(() => {
-    // console.log("rerendeeeer");
+    console.log("appState");
     console.log(appState);
   });
 
@@ -40,8 +40,6 @@ function App() {
   const [newRouteName, setNewRouteName] = useState<string>("");
   const [addWalletUnitPopupVisibility, setAddWalletUnitPopupVisibility] =
     useState<boolean>(true);
-  const [addRoutePopupVisibility, setAddRoutePopupVisibility] =
-    useState<boolean>(true);
   const emptyPotentialLink: PotentialLink = {
     id: nanoid(),
     name: "",
@@ -52,10 +50,14 @@ function App() {
   const emptyBlock: Block = {
     id: `block_${nanoid()}`,
     name: "",
+    duration: 3,
+    costFix: 0,
   };
   const defaultRouteBuilderState: RouteBuilderState = {
     routeBlockIds: [],
     blockDict: {},
+    currentRouteId: `route_${nanoid()}`,
+    currentRouteName: "",
   };
   const [potentialLinkData, setPotentialLinkData] =
     useState<PotentialLink>(emptyPotentialLink);
@@ -76,25 +78,67 @@ function App() {
     }));
   };
 
-  const saveRoute = () => {
-    const newId = `route_${nanoid()}`;
+  const editBlock = (blockId: string): void => {
+    setBlockState(appState.blocks[blockId]);
+  };
+
+  const editRoute = (routeId: string): void => {
+    const currentRoute = appState.routes[routeId];
+    const newBlockDict = currentRoute.blockList.reduce(
+      (acc: { [id: string]: string }, curr) => {
+        acc[nanoid()] = curr;
+        return acc;
+      },
+      {}
+    );
+    setRouteBuilderState({
+      blockDict: newBlockDict,
+      routeBlockIds: Object.keys(newBlockDict),
+      currentRouteId: routeId,
+      currentRouteName: currentRoute.name,
+    });
+    // setRouteBuilderState({
+    //   routeBlockIds: currentRoute.blockList,
+    //   blockDict: currentRoute.blockList.reduce(
+    //     (acc: { [id: string]: string }, curr) => {
+    //       acc[nanoid()] = curr;
+    //       return acc;
+    //     },
+    //     {}
+    //   ),
+    //   currentRouteId: routeId,
+    //   currentRouteName: currentRoute.name,
+    // });
+  };
+  const saveRoute = (mode: "overwrite" | "clone") => {
+    var routeId: string;
+    if (mode === "clone") {
+      routeId = nanoid();
+      setRouteBuilderState((prev) => ({ ...prev, currentRouteId: routeId }));
+    } else {
+      routeId = routeBuilderState.currentRouteId;
+    }
     setAppState((prev) => ({
       ...prev,
       routes: {
         ...prev.routes,
-        [newId]: {
-          id: newId,
-          name: newRouteName,
+        [routeId]: {
+          id: routeId,
+          name: routeBuilderState.currentRouteName,
           approveCount: 0,
           disapproveCount: 0,
-          blockList: [],
+          blockList: routeBuilderState.routeBlockIds.map(
+            (id) => routeBuilderState.blockDict[id]
+          ),
         },
       },
     }));
-    setAppState((prev) => ({
-      ...prev,
-      routeOrder: [...(prev.routeOrder || []), newId],
-    }));
+    if (!appState.routeOrder.includes(routeId)) {
+      setAppState((prev) => ({
+        ...prev,
+        routeOrder: [...(prev.routeOrder || []), routeId],
+      }));
+    }
   };
 
   const addLink = () => {
@@ -107,39 +151,36 @@ function App() {
       durationUnit: durationUnit,
       // setCreateLinkPopupVisibility(true);
     };
-    if (potentialLinkData.routeId) {
-      setAppState((prev) => {
-        return {
-          ...prev,
-          links: { ...prev.links, [newLink.id]: newLink },
-          // routes: { ...prev.routes, [route.id]: newRoute },
-        };
-        // const route = prev.routes[potentialLinkData.routeId || 0];
-        // const blockList = route.blockList;
-        // const index = potentialLinkData
-        //   ? potentialLinkData.index
-        //     ? potentialLinkData.index
-        //     : 0
-        //   : 0;
-        // const newIngredientList = [
-        //   ...blockList.slice(0, index),
-        //   {
-        //     id: nanoid(),
-        //     type: "action" as IngredientType,
-        //     unitId: id,
-        //   },
-        //   ...ingredientList.slice(potentialLinkData.index),
-        // ];
-        // const newRoute = { ...route, ingredientList: newIngredientList };
-      });
-    }
+    setAppState(
+      (prev) => ({
+        ...prev,
+        links: { ...prev.links, [newLink.id]: newLink },
+        // routes: { ...prev.routes, [route.id]: newRoute },
+      })
+      // const route = prev.routes[potentialLinkData.routeId || 0];
+      // const blockList = route.blockList;
+      // const index = potentialLinkData
+      //   ? potentialLinkData.index
+      //     ? potentialLinkData.index
+      //     : 0
+      //   : 0;
+      // const newIngredientList = [
+      //   ...blockList.slice(0, index),
+      //   {
+      //     id: nanoid(),
+      //     type: "action" as IngredientType,
+      //     unitId: id,
+      //   },
+      //   ...ingredientList.slice(potentialLinkData.index),
+      // ];
+      // const newRoute = { ...route, ingredientList: newIngredientList };
+    );
   };
 
   const addBlock = () => {
-    addLink();
     setAppState((prev) => ({
       ...prev,
-      blocks: { ...prev.blocks, [potentialLinkData.id]: blockState },
+      blocks: { ...prev.blocks, [blockState.id]: blockState },
     }));
     setPotentialLinkData(emptyPotentialLink);
     setBlockState(emptyBlock);
@@ -236,7 +277,7 @@ function App() {
     if (event.target.dataset["field"] === "duration") {
       setPotentialLinkData((prev) => ({
         ...prev,
-        [field]: parseInt(event.target.value),
+        [field]: sanitizeNumericInput(event.target.value),
       }));
     } else {
       setPotentialLinkData((prev) => ({
@@ -246,29 +287,16 @@ function App() {
     }
   };
   const calculateTotalRouteDuration = (routeId: string) => {
-    const links = appState.routes[routeId].blockList.map((blockId) => {
-      const block: Block = appState.blocks[blockId];
-      const linkId = block.linkId as string;
-      return appState.links[linkId] as Link;
-    });
-    const duration: number = links.reduce((acc, curr, index) => {
-      console.log(typeof acc);
-      return acc + (curr.duration ? curr.duration : 0);
-    }, 0);
+    const duration = appState.routes[routeId].blockList.reduce(
+      (acc: number, currentBlockid: string) => {
+        const currentBlock = appState.blocks[currentBlockid];
+        return currentBlock.duration ? acc + currentBlock.duration : 0;
+      },
+      0
+    );
     return duration;
   };
-  const smartSplice = (
-    array: (string | number | {})[],
-    insertable: {} | string | number,
-    index: number
-  ): (string | number | {})[] => {
-    console.log(array, insertable, index);
-    console.log([...array.slice(0, index), insertable, ...array.slice(index)]);
-
-    return [...array.slice(0, index), insertable, ...array.slice(index)];
-  };
   // const onDragUpdate = (data: any) => {
-  //   // console.log(data);
   //   const ingredientList =
   //     appState.routes[data.destination.droppableId]?.ingredientList;
   //   const index = data.destination.index;
@@ -379,15 +407,6 @@ function App() {
         newRouteBlickId,
         destination.index
       );
-      console.log(routeBuilderState);
-      console.log({
-        ...routeBuilderState,
-        routeBlockIds: newBlockIds,
-        blockDict: {
-          ...routeBuilderState.blockDict,
-          [newRouteBlickId]: draggableId,
-        },
-      });
 
       setRouteBuilderState(
         (prev) =>
@@ -450,17 +469,14 @@ function App() {
               getWalletById={getWalletById}
               addBlock={addBlock}
               potentialLinkData={potentialLinkData}
-            >
-              <CreateLinkInlineContainer>
-                <CreateLink
-                  potentialLinkData={potentialLinkData}
-                  changePotentialLinkData={changePotentialLinkData}
-                ></CreateLink>
-              </CreateLinkInlineContainer>
-            </BlockCreator>
+            ></BlockCreator>
           </BlockCreatorContainer>
           <BlocksContainer>
-            <Blocks appState={appState} getWalletById={getWalletById} />
+            <Blocks
+              appState={appState}
+              getWalletById={getWalletById}
+              editBlock={editBlock}
+            />
           </BlocksContainer>
           <RouteBuilderContainer>
             <RouteBuilder
@@ -468,6 +484,7 @@ function App() {
               getWalletById={getWalletById}
               routeBuilderState={routeBuilderState}
               setRouteBuilderState={setRouteBuilderState}
+              saveRoute={saveRoute}
             />
           </RouteBuilderContainer>
           <FilterContainer>
@@ -476,15 +493,12 @@ function App() {
           <RouteContainer>
             <Routes
               appState={appState}
-              setAddRoutePopupVisibility={setAddRoutePopupVisibility}
-              addRoutePopupVisibility={addRoutePopupVisibility}
-              changeRouteName={changeRouteName}
               newRouteName={newRouteName}
               calculateTotalRouteDuration={calculateTotalRouteDuration}
-              getCurrencyNameByIngredientId={getCurrencyNameByIngredientId}
-              getPlatformNameByIngredientId={getPlatformNameByIngredientId}
               getWalletById={getWalletById}
+              getActonById={getActonById}
               approveRoute={approveRoute}
+              editRoute={editRoute}
               disapproveRoute={disapproveRoute}
             ></Routes>
           </RouteContainer>
@@ -502,7 +516,7 @@ const RouteContainer = styled.div`
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 200px 158px 155px 175px 30px 1fr;
+  grid-template-rows: 200px 158px 175px 195px 30px 1fr;
   grid-template-columns: 1fr 1fr;
   grid-template-areas: "wallets actions" "blockCreator blockCreator" "blocks blocks" "routeBuilder routeBuilder" "filters filters" "routes routes";
   & > * {
@@ -521,19 +535,6 @@ const BlockCreatorContainer = styled.div`
 `;
 const RouteBuilderContainer = styled.div`
   grid-area: routeBuilder;
-`;
-const CreateLinkInlineContainer = styled.div`
-  display: grid;
-  grid-template-rows: 1fr;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2px;
-  & > div {
-    background-color: gray;
-    padding: 2px;
-  }
-  & > div > input {
-    background-color: #659dbd;
-  }
 `;
 
 const WalletContainer = styled.div`

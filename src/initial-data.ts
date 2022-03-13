@@ -21,7 +21,28 @@ const initialData: AppData = {
     { id: "action_EXCHANGE", name: "Exchange" },
   ],
   links: {},
-  blocks: {},
+  blocks: {
+    block_8a9bFlLdYQ_GViANVHVj8: {
+      id: "block_8a9bFlLdYQ_GViANVHVj8",
+      name: "asd",
+      duration: 9900,
+      durationUnit: 60,
+      costFix: 0,
+      wallet1Id: "wallet_555iiiiNODYsieVAv5555",
+      wallet2Id: "wallet_666iiiiNODYsieVAv5666",
+      linkId: "action_BEP2",
+    },
+    block_cGRbn85wsFZ2Uwim5Pgf1: {
+      id: "block_cGRbn85wsFZ2Uwim5Pgf1",
+      name: "adfadsf",
+      duration: 5,
+      durationUnit: 1,
+      costFix: 10,
+      wallet1Id: "wallet_666iiiiNODYsieVAv5666",
+      wallet2Id: "wallet_555iiiiNODYsieVAv5555",
+      linkId: "action_BEP2",
+    },
+  },
   blockOrder: [],
   wallets: [
     {
@@ -57,15 +78,15 @@ const initialData: AppData = {
   ],
   walletOrder: [],
   routes: {
-    route_GGUBbciNODYsieVAv5qzb: {
-      id: "route_GGUBbciNODYsieVAv5qzb",
-      name: "Sample route",
-      blockList: [],
+    "route_A871AiCeVZI9z4kA-fZMk": {
+      id: "route_A871AiCeVZI9z4kA-fZMk",
+      name: "yello",
       approveCount: 0,
       disapproveCount: 0,
+      blockList: ["block_8a9bFlLdYQ_GViANVHVj8", "block_cGRbn85wsFZ2Uwim5Pgf1"],
     },
   },
-  routeOrder: ["route_GGUBbciNODYsieVAv5qzb"],
+  routeOrder: ["route_A871AiCeVZI9z4kA-fZMk"],
 };
 
 export default initialData;
