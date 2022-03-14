@@ -13,7 +13,6 @@ import {
   Action,
   RouteBuilderState,
 } from "./common/types";
-import { Title } from "./common/styles";
 import Actions from "./components/Actions";
 import Wallets from "./components/Wallets";
 import Routes from "./components/Routes";
@@ -397,7 +396,7 @@ function App() {
             />
           </RouteBuilderContainer>
           <FilterContainer>
-            <Filters></Filters>
+            <Filters appState={appState} setAppState={setAppState}></Filters>
           </FilterContainer>
           <RouteContainer>
             <Routes
@@ -424,7 +423,7 @@ const RouteContainer = styled.div`
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 200px 158px 175px 195px 30px 1fr;
+  grid-template-rows: 200px 158px 175px 195px minmax(40px, max-content) 1fr;
   grid-template-columns: 1fr 1fr;
   grid-template-areas: "wallets actions" "blockCreator blockCreator" "blocks blocks" "routeBuilder routeBuilder" "filters filters" "routes routes";
   & > * {
@@ -434,6 +433,7 @@ const Container = styled.div`
 
 const FilterContainer = styled.div`
   grid-area: filters;
+  padding-bottom: 10px;
 `;
 const BlocksContainer = styled.div`
   grid-area: blocks;

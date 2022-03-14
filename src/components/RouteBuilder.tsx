@@ -13,8 +13,6 @@ const RouteBuilder = ({
   getWalletById,
   saveRoute,
 }: Props) => {
-  console.log("routeBuilderState");
-  console.log(routeBuilderState);
   const compareWallets = (id1: string, id2: string): number => {
     return id1 === id2 ? 1 : 0;
   };

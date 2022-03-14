@@ -20,7 +20,6 @@ function displayRouteDuration(duration: number): string {
   }
   return `near instant`;
 }
-
 const Routes = ({
   appState,
   calculateTotalRouteDuration,
@@ -30,80 +29,133 @@ const Routes = ({
   editRoute,
   disapproveRoute,
 }: Props) => {
+  const showRoute = (routeId: string) => {
+    let showRoute = true;
+    const filters = appState.filters;
+    const route = appState.routes[routeId];
+    const wallets = appState.wallets;
+    const startWalletId = appState.blocks[route.blockList[0]].wallet1Id as any;
+    const startWallet = wallets.find((wallet) => wallet.id === startWalletId);
+    const endWalletId = appState.blocks[
+      route.blockList[route.blockList.length - 1]
+    ].wallet2Id as any;
+    const endWallet = wallets.find((wallet) => wallet.id === endWalletId);
+
+    if (startWallet) {
+      if (filters.startCurrency.length) {
+        if (
+          startWallet.currencyId &&
+          !filters.startCurrency.includes(startWallet.currencyId)
+        ) {
+          showRoute = false;
+        }
+      }
+      if (filters.startPlatform.length) {
+        if (
+          startWallet.platformId &&
+          !filters.startPlatform.includes(startWallet.platformId)
+        ) {
+          showRoute = false;
+        }
+      }
+    }
+    if (endWallet) {
+      if (filters.endCurrency.length) {
+        if (
+          endWallet.currencyId &&
+          !filters.endCurrency.includes(endWallet.currencyId)
+        ) {
+          showRoute = false;
+        }
+      }
+      if (filters.endPlatform.length) {
+        if (
+          endWallet.platformId &&
+          !filters.endPlatform.includes(endWallet.platformId)
+        ) {
+          showRoute = false;
+        }
+      }
+    }
+    return showRoute;
+  };
   return (
     <>
       <Title>Routes</Title>
-      {appState.routeOrder?.map((routeId) => (
-        <div key={`a${routeId}`}>
-          <Route>
-            <RouteName>
-              {`${appState.routes[routeId].name}
+      {appState.routeOrder?.map(
+        (routeId) =>
+          showRoute(routeId) && (
+            <div key={`a${routeId}`}>
+              <Route>
+                <RouteName>
+                  {`${appState.routes[routeId].name}
                   
                   Total duration: ${displayRouteDuration(
                     calculateTotalRouteDuration(routeId)
                   )} `}
-              <button onClick={() => editRoute(routeId)}>Edit Route</button>
-            </RouteName>
-            <Unit>
-              {
-                getWalletById(
-                  appState.blocks[appState.routes[routeId].blockList[0]]
-                    .wallet1Id as string
-                )?.["platformId"]
-              }
-              <br />
-              {
-                getWalletById(
-                  appState.blocks[appState.routes[routeId].blockList[0]]
-                    .wallet1Id as string
-                )?.["currencyId"]
-              }
-            </Unit>
-            {appState.routes[routeId].blockList?.map((blockId, index) => (
-              <React.Fragment key={blockId}>
-                <Arrow key={`${blockId}key2`}>&gt;</Arrow>
-                <Unit key={`${blockId}2`}>
-                  {" "}
-                  {
-                    getActonById(appState.blocks[blockId].linkId as string)?.[
-                      "name"
-                    ]
-                  }
-                  <br />
-                  <Small>
-                    Duration: {displayDuration(appState.blocks[blockId])}
-                  </Small>
-                </Unit>
-                <Arrow key={`${blockId}key1`}>&gt;</Arrow>
-                <Unit key={`${blockId}1`}>
-                  {" "}
+                  <button onClick={() => editRoute(routeId)}>Edit Route</button>
+                </RouteName>
+                <Unit>
                   {
                     getWalletById(
-                      appState.blocks[blockId].wallet2Id as string
+                      appState.blocks[appState.routes[routeId].blockList[0]]
+                        .wallet1Id as string
                     )?.["platformId"]
                   }
                   <br />
                   {
                     getWalletById(
-                      appState.blocks[blockId].wallet2Id as string
+                      appState.blocks[appState.routes[routeId].blockList[0]]
+                        .wallet1Id as string
                     )?.["currencyId"]
                   }
                 </Unit>
-              </React.Fragment>
-            ))}
-          </Route>
-          <RouteMeta>
-            <div>
-              Approve: {appState.routes[routeId]?.approveCount}
-              <button onClick={() => approveRoute(routeId)}>👍</button>
+                {appState.routes[routeId].blockList?.map((blockId, index) => (
+                  <React.Fragment key={blockId}>
+                    <Arrow key={`${blockId}key2`}>&gt;</Arrow>
+                    <Unit key={`${blockId}2`}>
+                      {" "}
+                      {
+                        getActonById(
+                          appState.blocks[blockId].linkId as string
+                        )?.["name"]
+                      }
+                      <br />
+                      <Small>
+                        Duration: {displayDuration(appState.blocks[blockId])}
+                      </Small>
+                    </Unit>
+                    <Arrow key={`${blockId}key1`}>&gt;</Arrow>
+                    <Unit key={`${blockId}1`}>
+                      {" "}
+                      {
+                        getWalletById(
+                          appState.blocks[blockId].wallet2Id as string
+                        )?.["platformId"]
+                      }
+                      <br />
+                      {
+                        getWalletById(
+                          appState.blocks[blockId].wallet2Id as string
+                        )?.["currencyId"]
+                      }
+                    </Unit>
+                  </React.Fragment>
+                ))}
+              </Route>
+              <RouteMeta>
+                <div>
+                  Approve: {appState.routes[routeId]?.approveCount}
+                  <button onClick={() => approveRoute(routeId)}>👍</button>
+                </div>
+                <div>
+                  Disapprove: {appState.routes[routeId]?.disapproveCount}
+                  <button onClick={() => disapproveRoute(routeId)}>👎</button>
+                </div>
+              </RouteMeta>
             </div>
-            <div>
-              Disapprove: {appState.routes[routeId]?.disapproveCount}
-              <button onClick={() => disapproveRoute(routeId)}>👎</button>
-            </div>
-          </RouteMeta>
-        </div>
-      ))}
+          )
+      )}
     </>
   );
 };

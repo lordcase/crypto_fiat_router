@@ -101,12 +101,17 @@ export interface PotentialLink extends Link {
 }
 
 export interface Filters {
-  startWallet?: string | undefined;
-  endWallet?: string | undefined;
-  startCurrency?: string | undefined;
-  endCurrency?: string | undefined;
-  maxDuration?: number | undefined;
+  startPlatform: string[];
+  endPlatform: string[];
+  startCurrency: string[];
+  endCurrency: string[];
+  maxDuration?: number;
 }
+export type FilterBlocks =
+  | "startPlatform"
+  | "endPlatform"
+  | "startCurrency"
+  | "endCurrency";
 
 export interface AppData {
   currencies: Currency[];

@@ -5,6 +5,7 @@ const initialData: AppData = {
     { id: "USD", name: "USD" },
     { id: "EUR", name: "EUR" },
     { id: "BTC", name: "BTC" },
+    { id: "HUF", name: "HUF" },
   ],
   platforms: [
     { id: "REVOLUT", name: "Revolut" },
@@ -77,7 +78,12 @@ const initialData: AppData = {
     },
   ],
   walletOrder: [],
-  filters: {},
+  filters: {
+    startPlatform: [],
+    endPlatform: [],
+    startCurrency: [],
+    endCurrency: [],
+  },
   routes: {
     "route_A871AiCeVZI9z4kA-fZMk": {
       id: "route_A871AiCeVZI9z4kA-fZMk",
