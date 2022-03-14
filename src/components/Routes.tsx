@@ -4,6 +4,23 @@ import { displayDuration } from "../common/helpers";
 import { Title, Small, Unit } from "../common/styles";
 import { Action, AppData, Wallet } from "../common/types";
 
+function displayRouteDuration(duration: number): string {
+  if (duration / 86400 >= 1) {
+    return `${Math.floor(duration / 86400)} - ${
+      Math.floor(duration / 86400) + 1
+    } days`;
+  }
+  if (duration / 3600 >= 1) {
+    return `${Math.floor(duration / 3600)} - ${
+      Math.floor(duration / 3600) + 1
+    } hours`;
+  }
+  if (duration / 60 >= 1) {
+    return `~${Math.floor(duration / 6)} minutes`;
+  }
+  return `near instant`;
+}
+
 const Routes = ({
   appState,
   calculateTotalRouteDuration,
@@ -22,7 +39,9 @@ const Routes = ({
             <RouteName>
               {`${appState.routes[routeId].name}
                   
-                  Total duration: ${calculateTotalRouteDuration(routeId)} `}
+                  Total duration: ${displayRouteDuration(
+                    calculateTotalRouteDuration(routeId)
+                  )} `}
               <button onClick={() => editRoute(routeId)}>Edit Route</button>
             </RouteName>
             <Unit>
@@ -93,7 +112,7 @@ export default Routes;
 
 type Props = {
   appState: AppData;
-  calculateTotalRouteDuration(routeId: string): string;
+  calculateTotalRouteDuration(routeId: string): number;
   getWalletById(id: string): Wallet | undefined;
   getActonById(id: string): Action | undefined;
   approveRoute(routeId: string): void;

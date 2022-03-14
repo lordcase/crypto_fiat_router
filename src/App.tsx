@@ -20,6 +20,7 @@ import Routes from "./components/Routes";
 import BlockCreator from "./components/BlockCreator";
 import Blocks from "./components/Blocks";
 import RouteBuilder from "./components/RouteBuilder";
+import Filters from "./components/Filters";
 
 function App() {
   useEffect(() => {
@@ -191,7 +192,7 @@ function App() {
     });
   };
 
-  const calculateTotalRouteDuration = (routeId: string) => {
+  const calculateTotalRouteDuration = (routeId: string): number => {
     const duration = appState.routes[routeId].blockList.reduce(
       (acc: number, currentBlockid: string) => {
         const currentBlock = appState.blocks[currentBlockid];
@@ -201,21 +202,9 @@ function App() {
       },
       0
     );
-    if (duration / 86400 >= 1) {
-      return `${Math.floor(duration / 86400)} - ${
-        Math.floor(duration / 86400) + 1
-      } days`;
-    }
-    if (duration / 3600 >= 1) {
-      return `${Math.floor(duration / 3600)} - ${
-        Math.floor(duration / 3600) + 1
-      } hours`;
-    }
-    if (duration / 60 >= 1) {
-      return `~${Math.floor(duration / 6)} minutes`;
-    }
-    return `near instant`;
+    return duration;
   };
+
   // const onDragUpdate = (data: any) => {
   //   const ingredientList =
   //     appState.routes[data.destination.droppableId]?.ingredientList;
@@ -408,7 +397,7 @@ function App() {
             />
           </RouteBuilderContainer>
           <FilterContainer>
-            <Title>Filters</Title>
+            <Filters></Filters>
           </FilterContainer>
           <RouteContainer>
             <Routes
