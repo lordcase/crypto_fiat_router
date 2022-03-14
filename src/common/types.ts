@@ -100,6 +100,14 @@ export interface PotentialLink extends Link {
   routeId?: string;
 }
 
+export interface Filters {
+  startWallet?: string | undefined;
+  endWallet?: string | undefined;
+  startCurrency?: string | undefined;
+  endCurrency?: string | undefined;
+  maxDuration?: number | undefined;
+}
+
 export interface AppData {
   currencies: Currency[];
   platforms: Platform[];
@@ -111,6 +119,7 @@ export interface AppData {
   walletOrder: string[];
   routes: Routes;
   routeOrder: string[];
+  filters: Filters;
 }
 
 export type DurationValues = 1 | 60 | 3600 | 86400;

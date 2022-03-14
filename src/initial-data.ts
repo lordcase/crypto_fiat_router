@@ -77,6 +77,7 @@ const initialData: AppData = {
     },
   ],
   walletOrder: [],
+  filters: {},
   routes: {
     "route_A871AiCeVZI9z4kA-fZMk": {
       id: "route_A871AiCeVZI9z4kA-fZMk",
