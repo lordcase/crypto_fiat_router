@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import styled from "styled-components";
 import initialData from "./initial-data";
+import initialDataEmpty from "./initial-data-empty";
 import { DragDropContext } from "react-beautiful-dnd";
 import { nanoid } from "nanoid";
 import { smartSplice } from "./common/helpers";
@@ -21,13 +22,42 @@ import Blocks from "./components/Blocks";
 import RouteBuilder from "./components/RouteBuilder";
 import Filters from "./components/Filters";
 
+// Import Parse minified version
+import Parse from "parse";
+
+// Your Parse initialization configuration goes here
+const PARSE_APPLICATION_ID = "XlFgDqzvZrRiQO0T5m6Z3zCgQqZ0WZ7FrFRE5doL";
+const PARSE_HOST_URL = "https://parseapi.back4app.com/";
+const PARSE_JAVASCRIPT_KEY = "Nvn7KB17n9KuZQ4DfTRNkPxwgNbVAiYk7KsT3VOZ";
+Parse.initialize(PARSE_APPLICATION_ID, PARSE_JAVASCRIPT_KEY);
+Parse.serverURL = PARSE_HOST_URL;
+
 function App() {
   useEffect(() => {
-    console.log("appState");
-    console.log(appState);
-  });
+    console.log("appState1");
+    const query = new Parse.Query("crouterState");
+    query.descending("createdAt");
+    // use the equalTo filter to look for user which the name is John. this filter can be used in any data type
+    // run the query
+    try {
+      query.first().then((result) => {
+        console.log(result?.attributes.appState);
 
-  const [appState, setAppState] = useState<AppData>(initialData);
+        if (result) setAppState(result.attributes.appState);
+      });
+      console.log("appState2");
+    } catch (error: any) {
+      // Error can be caused by lack of Internet connection
+      alert(`Error! ${error.message}`);
+    }
+    getCurrentUser();
+  }, []);
+
+  const [appState, setAppState] = useState<AppData>(initialDataEmpty);
+  const [loginState, setLoginState] = useState({ loggedIn: false, user: {} });
+  const [currentUser, setCurrentUser] = useState<Parse.Object | undefined>(
+    undefined
+  );
   const [newWalletUnitPlatform, setNewWalletUnitPlatform] = useState<string>(
     initialData.platforms[0].id
   );
@@ -61,6 +91,52 @@ function App() {
   const [routeBuilderState, setRouteBuilderState] = useState<RouteBuilderState>(
     defaultRouteBuilderState
   );
+
+  const login = async function (): Promise<boolean> {
+    // Note that these values come from state variables that we've declared before
+    const usernameValue: string = "krisz";
+    const passwordValue: string = "hello";
+    try {
+      const loggedInUser: Parse.User = await Parse.User.logIn(
+        usernameValue,
+        passwordValue
+      );
+      // logIn returns the corresponding ParseUser object
+      alert(
+        `Success! User ${loggedInUser.get(
+          "username"
+        )} has successfully signed in!`
+      );
+      // To verify that this is in fact the current user, `current` can be used
+      const currentUser = await Parse.User.current();
+      console.log(loggedInUser === currentUser);
+      return true;
+    } catch (error: any) {
+      // Error can be caused by wrong parameters or lack of Internet connection
+      alert(`Error! ${error.message}`);
+      return false;
+    }
+  };
+  const getCurrentUser = async function (): Promise<Parse.User | undefined> {
+    const currentUser: Parse.User | undefined = await Parse.User.current();
+    // Update state variable holding current user
+    setCurrentUser(currentUser);
+    return currentUser;
+  };
+  const saveState = async function (): Promise<boolean> {
+    let state: Parse.Object = new Parse.Object("crouterState");
+    state.set("appState", appState);
+    try {
+      await state.save();
+      // Success
+      alert("Success! State saved!");
+      return true;
+    } catch (error: any) {
+      // Error can be caused by lack of Internet connection
+      alert(`Error! ${error.message}`);
+      return false;
+    }
+  };
 
   const addWallet = () => {
     const newWallet: Wallet = {
@@ -352,6 +428,12 @@ function App() {
   };
   return (
     <div>
+      <ControlBar>
+        Current user:{" "}
+        {currentUser ? currentUser.get("username") : "not logged in"}
+        {/* <LoginButton onClick={login}>LOGIN!</LoginButton> */}
+        <SaveButton onClick={saveState}>SAVE STATE!</SaveButton>
+      </ControlBar>
       <DragDropContext onDragEnd={onDragEnd}>
         <Container>
           <WalletContainer>
@@ -430,6 +512,19 @@ const Container = styled.div`
     border: 1px solid black;
   }
 `;
+const ControlBar = styled.div`
+  display: flex;
+  padding: 8px;
+  gap: 8px;
+  position: sticky;
+  top: 0px;
+  background: white;
+  border-bottom: 2px solid black;
+  z-index: 100;
+`;
+
+const LoginButton = styled.button``;
+const SaveButton = styled.button``;
 
 const FilterContainer = styled.div`
   grid-area: filters;
