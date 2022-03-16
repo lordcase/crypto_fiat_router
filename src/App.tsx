@@ -54,7 +54,7 @@ function App() {
   }, []);
 
   const [appState, setAppState] = useState<AppData>(initialDataEmpty);
-  const [loginState, setLoginState] = useState({ loggedIn: false, user: {} });
+  // const [loginState, setLoginState] = useState({ loggedIn: false, user: {} });
   const [currentUser, setCurrentUser] = useState<Parse.Object | undefined>(
     undefined
   );
@@ -92,31 +92,27 @@ function App() {
     defaultRouteBuilderState
   );
 
-  const login = async function (): Promise<boolean> {
-    // Note that these values come from state variables that we've declared before
-    const usernameValue: string = "krisz";
-    const passwordValue: string = "hello";
-    try {
-      const loggedInUser: Parse.User = await Parse.User.logIn(
-        usernameValue,
-        passwordValue
-      );
-      // logIn returns the corresponding ParseUser object
-      alert(
-        `Success! User ${loggedInUser.get(
-          "username"
-        )} has successfully signed in!`
-      );
-      // To verify that this is in fact the current user, `current` can be used
-      const currentUser = await Parse.User.current();
-      console.log(loggedInUser === currentUser);
-      return true;
-    } catch (error: any) {
-      // Error can be caused by wrong parameters or lack of Internet connection
-      alert(`Error! ${error.message}`);
-      return false;
-    }
-  };
+  // const login = async function (): Promise<boolean> {
+  //   const usernameValue: string = "krisz";
+  //   const passwordValue: string = "hello";
+  //   try {
+  //     const loggedInUser: Parse.User = await Parse.User.logIn(
+  //       usernameValue,
+  //       passwordValue
+  //     );
+  //     alert(
+  //       `Success! User ${loggedInUser.get(
+  //         "username"
+  //       )} has successfully signed in!`
+  //     );
+  //     const currentUser = await Parse.User.current();
+  //     console.log(loggedInUser === currentUser);
+  //     return true;
+  //   } catch (error: any) {
+  //     alert(`Error! ${error.message}`);
+  //     return false;
+  //   }
+  // };
   const getCurrentUser = async function (): Promise<Parse.User | undefined> {
     const currentUser: Parse.User | undefined = await Parse.User.current();
     // Update state variable holding current user
@@ -523,7 +519,7 @@ const ControlBar = styled.div`
   z-index: 100;
 `;
 
-const LoginButton = styled.button``;
+// const LoginButton = styled.button``;
 const SaveButton = styled.button``;
 
 const FilterContainer = styled.div`
